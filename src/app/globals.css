@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #fafafa;
+  --bg-secondary: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  --accent-rose: #e94560;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-cyan: #7ec8e3;
+  --accent-green: #10b981;
+
+  --creational: #3b82f6;
+  --creational-dark: #1e40af;
+  --creational-light: #93c5fd;
+
+  --structural: #8b5cf6;
+  --structural-dark: #6d28d9;
+  --structural-light: #c4b5fd;
+
+  --behavioral: #e94560;
+  --behavioral-dark: #be123c;
+  --behavioral-light: #fda4af;
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+.dark {
+  --bg-primary: #0a0a1a;
+  --bg-secondary: #111827;
+  --bg-surface: #1a1a2e;
+  --bg-elevated: #1e293b;
+
+  --text-primary: #e0e0e0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+}
+
+@theme inline {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-accent-rose: var(--accent-rose);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-cyan: var(--accent-cyan);
+  --color-accent-green: var(--accent-green);
+
+  --color-creational: var(--creational);
+  --color-creational-dark: var(--creational-dark);
+  --color-creational-light: var(--creational-light);
+
+  --color-structural: var(--structural);
+  --color-structural-dark: var(--structural-dark);
+  --color-structural-light: var(--structural-light);
+
+  --color-behavioral: var(--behavioral);
+  --color-behavioral-dark: var(--behavioral-dark);
+  --color-behavioral-light: var(--behavioral-light);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}

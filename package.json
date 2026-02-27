@@ -1,0 +1,56 @@
+{
+  "name": "design-pattern-decision-tree",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "npx serve out",
+    "lint": "eslint src/",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@xyflow/react": "latest",
+    "dagre": "^0.8.5",
+    "geist": "latest",
+    "hast-util-to-jsx-runtime": "latest",
+    "motion": "latest",
+    "next": "16.1.6",
+    "next-themes": "latest",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "shiki": "latest"
+  },
+  "devDependencies": {
+    "@playwright/test": "latest",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "latest",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@types/dagre": "latest",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "latest",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "eslint-plugin-jsx-a11y": "latest",
+    "jsdom": "latest",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vite-tsconfig-paths": "latest",
+    "vitest": "latest"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
+  }
+}

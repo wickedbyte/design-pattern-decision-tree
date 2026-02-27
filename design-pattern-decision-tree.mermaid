@@ -1,0 +1,59 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#16213e', 'lineColor': '#e94560', 'secondaryColor': '#0f3460', 'tertiaryColor': '#533483', 'fontSize': '14px'}}}%%
+
+flowchart TD
+    Start["🔍 What is your main pain point?"]
+    Start --> Creation["🏗️ <b>Object Creation</b><br/>Creation logic is getting<br/>complex or scattered"]
+    Start --> Structure["🔗 <b>Boundaries & Structure</b><br/>Fighting component boundaries<br/>or external dependencies"]
+    Start --> Behavior["⚡ <b>Behavior & Logic</b><br/>Behavior keeps changing,<br/>conditionals keep growing"]
+
+    %% === CREATIONAL BRANCH ===
+    Creation --> C1{"Need exactly<br/>one shared instance?"}
+    C1 -->|Yes| Singleton["✅ <b>Singleton</b><br/>One global instance<br/>with controlled access"]
+    C1 -->|No| C2{"Object has many<br/>optional parts or<br/>complex construction?"}
+    C2 -->|Yes| Builder["✅ <b>Builder</b><br/>Step-by-step construction<br/>of complex objects"]
+    C2 -->|No| C3{"Need to clone<br/>an existing object?"}
+    C3 -->|Yes| Prototype["✅ <b>Prototype</b><br/>Copy existing objects<br/>instead of creating new"]
+    C3 -->|No| C4{"Creating families of<br/>related objects that<br/>must be consistent?"}
+    C4 -->|Yes| AbstractFactory["✅ <b>Abstract Factory</b><br/>Create families of<br/>related objects together"]
+    C4 -->|No| Factory["✅ <b>Factory Method</b><br/>Delegate instantiation<br/>to subclasses"]
+
+    %% === STRUCTURAL BRANCH ===
+    Structure --> S1{"Integrating with an<br/>incompatible interface<br/>or legacy system?"}
+    S1 -->|Yes| Adapter["✅ <b>Adapter</b><br/>Convert one interface<br/>to another"]
+    S1 -->|No| S2{"Need to simplify<br/>a complex subsystem<br/>behind one entry point?"}
+    S2 -->|Yes| Facade["✅ <b>Facade</b><br/>Unified simple interface<br/>over complex internals"]
+    S2 -->|No| S3{"Need to add<br/>responsibilities to objects<br/>dynamically?"}
+    S3 -->|Yes| Decorator["✅ <b>Decorator</b><br/>Wrap objects to add<br/>behavior at runtime"]
+    S3 -->|No| S4{"Need to control<br/>access, lazy-load, or<br/>add a stand-in?"}
+    S4 -->|Yes| Proxy["✅ <b>Proxy</b><br/>Placeholder that controls<br/>access to another object"]
+    S4 -->|No| S5{"Working with<br/>tree / part-whole<br/>hierarchies?"}
+    S5 -->|Yes| Composite["✅ <b>Composite</b><br/>Treat individual and<br/>composite objects uniformly"]
+    S5 -->|No| Bridge["✅ <b>Bridge</b><br/>Separate abstraction<br/>from implementation"]
+
+    %% === BEHAVIORAL BRANCH ===
+    Behavior --> B1{"Need to notify<br/>multiple objects<br/>when state changes?"}
+    B1 -->|Yes| Observer["✅ <b>Observer</b><br/>Publish-subscribe for<br/>state change notifications"]
+    B1 -->|No| B2{"Need to swap<br/>algorithms or strategies<br/>at runtime?"}
+    B2 -->|Yes| Strategy["✅ <b>Strategy</b><br/>Encapsulate interchangeable<br/>algorithms"]
+    B2 -->|No| B3{"Object behavior depends<br/>on its current state?"}
+    B3 -->|Yes| State["✅ <b>State</b><br/>Behavior changes when<br/>internal state changes"]
+    B3 -->|No| B4{"Need undo/redo,<br/>queuing, or logging<br/>of operations?"}
+    B4 -->|Yes| Command["✅ <b>Command</b><br/>Encapsulate requests<br/>as objects"]
+    B4 -->|No| B5{"Request must pass<br/>through a chain<br/>of handlers?"}
+    B5 -->|Yes| Chain["✅ <b>Chain of Responsibility</b><br/>Pass request along<br/>a chain of handlers"]
+    B5 -->|No| B6{"Need to define<br/>an algorithm skeleton,<br/>defer steps to subclasses?"}
+    B6 -->|Yes| Template["✅ <b>Template Method</b><br/>Fixed skeleton, flexible<br/>steps in subclasses"]
+    B6 -->|No| Other["🔄 Re-examine the problem<br/>or consider simpler<br/>refactoring first"]
+
+    %% === STYLING ===
+    classDef startNode fill:#e94560,stroke:#e94560,color:#fff,font-weight:bold
+    classDef categoryNode fill:#0f3460,stroke:#16213e,color:#fff,font-weight:bold
+    classDef questionNode fill:#1a1a2e,stroke:#533483,color:#e0e0e0
+    classDef patternNode fill:#16213e,stroke:#0f3460,color:#7ec8e3
+    classDef fallbackNode fill:#533483,stroke:#533483,color:#fff
+
+    class Start startNode
+    class Creation,Structure,Behavior categoryNode
+    class C1,C2,C3,C4,S1,S2,S3,S4,S5,B1,B2,B3,B4,B5,B6 questionNode
+    class Singleton,Builder,Prototype,AbstractFactory,Factory,Adapter,Facade,Decorator,Proxy,Composite,Bridge,Observer,Strategy,State,Command,Chain,Template patternNode
+    class Other fallbackNode

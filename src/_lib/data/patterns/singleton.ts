@@ -6,7 +6,7 @@ export const singleton: PatternDefinition = {
   slug: createPatternSlug("singleton"),
   name: "Singleton",
   category: createCategoryId("creational"),
-  emoji: "1️⃣",
+  icon: "diamond",
   summary:
     "Ensure a class has only one instance and provide a global point of access to it.",
   intent:

@@ -6,7 +6,7 @@ export const builder: PatternDefinition = {
   slug: createPatternSlug("builder"),
   name: "Builder",
   category: createCategoryId("creational"),
-  emoji: "🔨",
+  icon: "hammer",
   summary:
     "Separate the construction of a complex object from its representation so the same construction process can create different representations.",
   intent:

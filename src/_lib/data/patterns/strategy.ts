@@ -6,7 +6,7 @@ export const strategy: PatternDefinition = {
   slug: createPatternSlug("strategy"),
   name: "Strategy",
   category: createCategoryId("behavioral"),
-  emoji: "♟️",
+  icon: "chess-pawn",
   summary:
     "Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from the clients that use it.",
   intent:
@@ -53,7 +53,7 @@ export const strategy: PatternDefinition = {
       language: "typescript",
       filename: "strategy.ts",
       description:
-        "A compression context that delegates to interchangeable strategy objects. New compression algorithms can be added without modifying the Compressor class.",
+        "A Compressor context delegates to interchangeable CompressionStrategy objects. New algorithms can be added without modifying the Compressor class.",
       code: `// Strategy interface
 interface CompressionStrategy {
   compress(data: string): string;
@@ -64,14 +64,14 @@ interface CompressionStrategy {
 class GzipStrategy implements CompressionStrategy {
   readonly name = "gzip";
   compress(data: string): string {
-    return \`[gzip compressed: \${data.length} -> \${Math.ceil(data.length * 0.6)} bytes]\`;
+    return \`[gzip: \${data.length} -> \${Math.ceil(data.length * 0.6)} bytes]\`;
   }
 }
 
 class BrotliStrategy implements CompressionStrategy {
   readonly name = "brotli";
   compress(data: string): string {
-    return \`[brotli compressed: \${data.length} -> \${Math.ceil(data.length * 0.45)} bytes]\`;
+    return \`[brotli: \${data.length} -> \${Math.ceil(data.length * 0.45)} bytes]\`;
   }
 }
 
@@ -96,214 +96,263 @@ class Compressor {
   }
 }
 
-// Usage
+// Usage — compress "Hello, World!" with each strategy
 const compressor = new Compressor(new GzipStrategy());
 console.log(compressor.execute("Hello, World!"));
+// Using gzip strategy
+// [gzip: 13 -> 8 bytes]
 
 compressor.setStrategy(new BrotliStrategy());
-console.log(compressor.execute("Hello, World!"));`,
+console.log(compressor.execute("Hello, World!"));
+// Using brotli strategy
+// [brotli: 13 -> 6 bytes]
+
+compressor.setStrategy(new NoCompression());
+console.log(compressor.execute("Hello, World!"));
+// Using none strategy
+// Hello, World!`,
     },
     {
       language: "python",
       filename: "strategy.py",
       description:
-        "Strategies defined as callables using Python's Protocol. The context accepts any callable matching the expected signature, making plain functions valid strategies.",
-      code: `from typing import Protocol
+        "A Compressor context delegates to CompressionStrategy implementations. Python's ABC enforces the interface contract for each concrete strategy.",
+      code: `from abc import ABC, abstractmethod
+import math
 
 
-class PaymentStrategy(Protocol):
-    """Any callable that processes a payment amount and returns a receipt."""
-
-    def __call__(self, amount: float) -> str: ...
-
-
-# Concrete strategies — simple functions satisfy the Protocol
-def credit_card(amount: float) -> str:
-    fee = amount * 0.029 + 0.30
-    return f"Charged {amount + fee:.2f} to credit card (includes {fee:.2f} fee)"
-
-
-def paypal(amount: float) -> str:
-    fee = amount * 0.035
-    return f"Sent {amount:.2f} via PayPal (fee: {fee:.2f})"
-
-
-def bank_transfer(amount: float) -> str:
-    return f"Bank transfer of {amount:.2f} initiated (no fee)"
-
-
-# Context
-class Checkout:
-    def __init__(self, strategy: PaymentStrategy) -> None:
-        self._strategy = strategy
+class CompressionStrategy(ABC):
+    """Interface for all compression algorithms."""
 
     @property
-    def strategy(self) -> PaymentStrategy:
-        return self._strategy
+    @abstractmethod
+    def name(self) -> str: ...
 
-    @strategy.setter
-    def strategy(self, strategy: PaymentStrategy) -> None:
+    @abstractmethod
+    def compress(self, data: str) -> str: ...
+
+
+class GzipStrategy(CompressionStrategy):
+    @property
+    def name(self) -> str:
+        return "gzip"
+
+    def compress(self, data: str) -> str:
+        size = math.ceil(len(data) * 0.6)
+        return f"[gzip: {len(data)} -> {size} bytes]"
+
+
+class BrotliStrategy(CompressionStrategy):
+    @property
+    def name(self) -> str:
+        return "brotli"
+
+    def compress(self, data: str) -> str:
+        size = math.ceil(len(data) * 0.45)
+        return f"[brotli: {len(data)} -> {size} bytes]"
+
+
+class NoCompression(CompressionStrategy):
+    @property
+    def name(self) -> str:
+        return "none"
+
+    def compress(self, data: str) -> str:
+        return data
+
+
+class Compressor:
+    """Context that delegates compression to a strategy."""
+
+    def __init__(self, strategy: CompressionStrategy) -> None:
         self._strategy = strategy
 
-    def pay(self, amount: float) -> str:
-        return self._strategy(amount)
+    def set_strategy(self, strategy: CompressionStrategy) -> None:
+        self._strategy = strategy
+
+    def execute(self, data: str) -> str:
+        print(f"Using {self._strategy.name} strategy")
+        return self._strategy.compress(data)
 
 
-# Usage
-checkout = Checkout(credit_card)
-print(checkout.pay(99.99))
-# Charged $103.19 to credit card (includes $3.20 fee)
+# Usage — compress "Hello, World!" with each strategy
+compressor = Compressor(GzipStrategy())
+print(compressor.execute("Hello, World!"))
+# Using gzip strategy
+# [gzip: 13 -> 8 bytes]
 
-checkout.strategy = bank_transfer
-print(checkout.pay(99.99))
-# Bank transfer of $99.99 initiated (no fee)`,
+compressor.set_strategy(BrotliStrategy())
+print(compressor.execute("Hello, World!"))
+# Using brotli strategy
+# [brotli: 13 -> 6 bytes]
+
+compressor.set_strategy(NoCompression())
+print(compressor.execute("Hello, World!"))
+# Using none strategy
+# Hello, World!`,
     },
     {
       language: "php",
       filename: "Strategy.php",
       description:
-        "A shipping cost calculator that delegates to different shipping strategy implementations. The Context calls the strategy through a shared interface.",
+        "A Compressor context delegates to CompressionStrategy implementations. New algorithms are added by implementing the interface — no changes to Compressor needed.",
       code: `<?php
 
 // Strategy interface
-interface ShippingStrategy
+interface CompressionStrategy
 {
-    public function calculate(float \$weight, float \$distance): float;
+    public function compress(string \$data): string;
     public function getName(): string;
 }
 
 // Concrete strategies
-class StandardShipping implements ShippingStrategy
+class GzipStrategy implements CompressionStrategy
 {
-    public function calculate(float \$weight, float \$distance): float
+    public function compress(string \$data): string
     {
-        return \$weight * 0.5 + \$distance * 0.01;
+        \$size = (int) ceil(strlen(\$data) * 0.6);
+        return "[gzip: " . strlen(\$data) . " -> {\$size} bytes]";
     }
 
     public function getName(): string
     {
-        return 'Standard';
+        return 'gzip';
     }
 }
 
-class ExpressShipping implements ShippingStrategy
+class BrotliStrategy implements CompressionStrategy
 {
-    public function calculate(float \$weight, float \$distance): float
+    public function compress(string \$data): string
     {
-        return (\$weight * 0.5 + \$distance * 0.01) * 2.5;
+        \$size = (int) ceil(strlen(\$data) * 0.45);
+        return "[brotli: " . strlen(\$data) . " -> {\$size} bytes]";
     }
 
     public function getName(): string
     {
-        return 'Express';
+        return 'brotli';
     }
 }
 
-class FreeShipping implements ShippingStrategy
+class NoCompression implements CompressionStrategy
 {
-    public function calculate(float \$weight, float \$distance): float
+    public function compress(string \$data): string
     {
-        return 0.0;
+        return \$data;
     }
 
     public function getName(): string
     {
-        return 'Free';
+        return 'none';
     }
 }
 
 // Context
-class ShippingCalculator
+class Compressor
 {
-    public function __construct(private ShippingStrategy \$strategy) {}
+    public function __construct(private CompressionStrategy \$strategy) {}
 
-    public function setStrategy(ShippingStrategy \$strategy): void
+    public function setStrategy(CompressionStrategy \$strategy): void
     {
         \$this->strategy = \$strategy;
     }
 
-    public function getQuote(float \$weight, float \$distance): string
+    public function execute(string \$data): string
     {
-        \$cost = \$this->strategy->calculate(\$weight, \$distance);
-        return sprintf(
-            "%s shipping: \$%.2f (%.1fkg, %.0fkm)",
-            \$this->strategy->getName(), \$cost, \$weight, \$distance
-        );
+        echo "Using " . \$this->strategy->getName() . " strategy\\n";
+        return \$this->strategy->compress(\$data);
     }
 }
 
-// Usage
-\$calc = new ShippingCalculator(new StandardShipping());
-echo \$calc->getQuote(5.0, 200) . "\\n"; // Standard shipping: $4.50
+// Usage — compress "Hello, World!" with each strategy
+\$compressor = new Compressor(new GzipStrategy());
+echo \$compressor->execute("Hello, World!") . "\\n";
+// Using gzip strategy
+// [gzip: 13 -> 8 bytes]
 
-\$calc->setStrategy(new ExpressShipping());
-echo \$calc->getQuote(5.0, 200) . "\\n"; // Express shipping: $11.25`,
+\$compressor->setStrategy(new BrotliStrategy());
+echo \$compressor->execute("Hello, World!") . "\\n";
+// Using brotli strategy
+// [brotli: 13 -> 6 bytes]
+
+\$compressor->setStrategy(new NoCompression());
+echo \$compressor->execute("Hello, World!") . "\\n";
+// Using none strategy
+// Hello, World!`,
     },
     {
       language: "rust",
       filename: "strategy.rs",
       description:
-        "Strategies implemented as trait objects and as closures. Rust supports both approaches — trait objects for complex strategies, closures for simple ones.",
-      code: `/// Strategy trait for sorting algorithms.
-trait SortStrategy {
-    fn sort(&self, data: &mut Vec<i32>);
+        "A Compressor context delegates to boxed CompressionStrategy trait objects. New algorithms are added by implementing the trait — no changes to Compressor needed.",
+      code: `/// Strategy trait for compression algorithms.
+trait CompressionStrategy {
+    fn compress(&self, data: &str) -> String;
     fn name(&self) -> &str;
 }
 
-struct BubbleSort;
-impl SortStrategy for BubbleSort {
-    fn sort(&self, data: &mut Vec<i32>) {
-        let len = data.len();
-        for i in 0..len {
-            for j in 0..len - 1 - i {
-                if data[j] > data[j + 1] {
-                    data.swap(j, j + 1);
-                }
-            }
-        }
+struct GzipStrategy;
+impl CompressionStrategy for GzipStrategy {
+    fn compress(&self, data: &str) -> String {
+        let size = (data.len() as f64 * 0.6).ceil() as usize;
+        format!("[gzip: {} -> {} bytes]", data.len(), size)
     }
-    fn name(&self) -> &str { "BubbleSort" }
+    fn name(&self) -> &str { "gzip" }
 }
 
-struct QuickSort;
-impl SortStrategy for QuickSort {
-    fn sort(&self, data: &mut Vec<i32>) {
-        data.sort_unstable(); // Rust's built-in is introsort
+struct BrotliStrategy;
+impl CompressionStrategy for BrotliStrategy {
+    fn compress(&self, data: &str) -> String {
+        let size = (data.len() as f64 * 0.45).ceil() as usize;
+        format!("[brotli: {} -> {} bytes]", data.len(), size)
     }
-    fn name(&self) -> &str { "QuickSort" }
+    fn name(&self) -> &str { "brotli" }
+}
+
+struct NoCompression;
+impl CompressionStrategy for NoCompression {
+    fn compress(&self, data: &str) -> String {
+        data.to_string()
+    }
+    fn name(&self) -> &str { "none" }
 }
 
 /// Context holds a boxed strategy trait object.
-struct Sorter {
-    strategy: Box<dyn SortStrategy>,
+struct Compressor {
+    strategy: Box<dyn CompressionStrategy>,
 }
 
-impl Sorter {
-    fn new(strategy: Box<dyn SortStrategy>) -> Self {
+impl Compressor {
+    fn new(strategy: Box<dyn CompressionStrategy>) -> Self {
         Self { strategy }
     }
 
-    fn set_strategy(&mut self, strategy: Box<dyn SortStrategy>) {
+    fn set_strategy(&mut self, strategy: Box<dyn CompressionStrategy>) {
         self.strategy = strategy;
     }
 
-    fn execute(&self, data: &mut Vec<i32>) {
-        println!("Sorting with {}", self.strategy.name());
-        self.strategy.sort(data);
+    fn execute(&self, data: &str) -> String {
+        println!("Using {} strategy", self.strategy.name());
+        self.strategy.compress(data)
     }
 }
 
 fn main() {
-    let mut data = vec![5, 2, 8, 1, 9, 3];
+    // Compress "Hello, World!" with each strategy
+    let mut compressor = Compressor::new(Box::new(GzipStrategy));
+    println!("{}", compressor.execute("Hello, World!"));
+    // Using gzip strategy
+    // [gzip: 13 -> 8 bytes]
 
-    let mut sorter = Sorter::new(Box::new(BubbleSort));
-    sorter.execute(&mut data);
-    println!("{:?}", data); // [1, 2, 3, 5, 8, 9]
+    compressor.set_strategy(Box::new(BrotliStrategy));
+    println!("{}", compressor.execute("Hello, World!"));
+    // Using brotli strategy
+    // [brotli: 13 -> 6 bytes]
 
-    data = vec![5, 2, 8, 1, 9, 3];
-    sorter.set_strategy(Box::new(QuickSort));
-    sorter.execute(&mut data);
-    println!("{:?}", data); // [1, 2, 3, 5, 8, 9]
+    compressor.set_strategy(Box::new(NoCompression));
+    println!("{}", compressor.execute("Hello, World!"));
+    // Using none strategy
+    // Hello, World!
 }`,
     },
   ],

@@ -6,7 +6,7 @@ export const chainOfResponsibility: PatternDefinition = {
   slug: createPatternSlug("chain-of-responsibility"),
   name: "Chain of Responsibility",
   category: createCategoryId("behavioral"),
-  emoji: "⛓️",
+  icon: "link",
   summary:
     "Avoid coupling the sender of a request to its receiver by giving more than one object a chance to handle the request. Chain the receiving objects and pass the request along the chain until an object handles it.",
   intent:
@@ -57,20 +57,19 @@ export const chainOfResponsibility: PatternDefinition = {
       language: "typescript",
       filename: "chain-of-responsibility.ts",
       description:
-        "A middleware-style pipeline for HTTP request processing. Each handler processes the request and decides whether to pass it to the next handler in the chain.",
+        "An HTTP middleware pipeline where AuthHandler, RateLimitHandler, and LoggingHandler each inspect the request and decide whether to pass it to the next handler or reject it.",
       code: `// Request object
-interface HttpRequest {
-  path: string;
+interface Request {
   method: string;
-  headers: Record<string, string>;
-  body?: string;
-  user?: string;
+  path: string;
+  headers: Map<string, string>;
+  clientIp: string;
 }
 
 // Handler interface
 interface Handler {
   setNext(handler: Handler): Handler;
-  handle(request: HttpRequest): HttpRequest | null;
+  handle(request: Request): Request | null;
 }
 
 // Abstract base handler with chaining logic
@@ -82,7 +81,7 @@ abstract class BaseHandler implements Handler {
     return handler; // enables chaining: a.setNext(b).setNext(c)
   }
 
-  handle(request: HttpRequest): HttpRequest | null {
+  handle(request: Request): Request | null {
     if (this.next) {
       return this.next.handle(request);
     }
@@ -90,341 +89,457 @@ abstract class BaseHandler implements Handler {
   }
 }
 
-// Concrete handlers
+// Checks for a valid Authorization header
 class AuthHandler extends BaseHandler {
-  handle(request: HttpRequest): HttpRequest | null {
-    const token = request.headers["authorization"];
-    if (!token) {
-      console.log("[Auth] Rejected: no token");
+  handle(request: Request): Request | null {
+    const auth = request.headers.get("Authorization");
+    if (!auth) {
+      console.log("[Auth] Rejected: missing Authorization header");
       return null; // stops the chain
     }
-    request.user = token.replace("Bearer ", "");
-    console.log(\`[Auth] Authenticated: \${request.user}\`);
+    console.log(\`[Auth] Passed: token present for \${request.clientIp}\`);
     return super.handle(request);
   }
 }
 
+// Tracks per-IP request counts and rejects above threshold
 class RateLimitHandler extends BaseHandler {
-  private requests = 0;
+  private counts = new Map<string, number>();
+  private readonly limit = 100;
 
-  handle(request: HttpRequest): HttpRequest | null {
-    this.requests++;
-    if (this.requests > 100) {
-      console.log("[RateLimit] Too many requests");
+  handle(request: Request): Request | null {
+    const count = (this.counts.get(request.clientIp) ?? 0) + 1;
+    this.counts.set(request.clientIp, count);
+    if (count > this.limit) {
+      console.log(\`[RateLimit] Rejected: \${request.clientIp} exceeded \${this.limit} requests\`);
       return null;
     }
-    console.log(\`[RateLimit] Request \${this.requests}/100\`);
+    console.log(\`[RateLimit] Passed: \${request.clientIp} at \${count}/\${this.limit}\`);
     return super.handle(request);
   }
 }
 
+// Logs the request method and path, always passes through
 class LoggingHandler extends BaseHandler {
-  handle(request: HttpRequest): HttpRequest | null {
-    console.log(\`[Log] \${request.method} \${request.path}\`);
+  handle(request: Request): Request | null {
+    console.log(\`[Logging] \${request.method} \${request.path} from \${request.clientIp}\`);
     return super.handle(request);
   }
 }
 
-// Build the chain
+// Build the chain: auth -> rateLimit -> logging
 const auth = new AuthHandler();
 const rateLimit = new RateLimitHandler();
 const logging = new LoggingHandler();
-
 auth.setNext(rateLimit).setNext(logging);
 
-// Usage
-const req: HttpRequest = {
-  path: "/api/users",
+// Valid request — passes all handlers
+console.log("--- Valid request ---");
+const validReq: Request = {
   method: "GET",
-  headers: { authorization: "Bearer alice" },
+  path: "/api/users",
+  headers: new Map([["Authorization", "Bearer abc123"]]),
+  clientIp: "192.168.1.10",
 };
+auth.handle(validReq);
+// [Auth] Passed: token present for 192.168.1.10
+// [RateLimit] Passed: 192.168.1.10 at 1/100
+// [Logging] GET /api/users from 192.168.1.10
 
-auth.handle(req);
-// [Auth] Authenticated: alice
-// [RateLimit] Request 1/100
-// [Log] GET /api/users`,
+// Invalid request — rejected by AuthHandler
+console.log("\\n--- Invalid request ---");
+const invalidReq: Request = {
+  method: "POST",
+  path: "/api/admin",
+  headers: new Map(),
+  clientIp: "10.0.0.5",
+};
+auth.handle(invalidReq);
+// [Auth] Rejected: missing Authorization header`,
     },
     {
       language: "python",
       filename: "chain_of_responsibility.py",
       description:
-        "A validation chain using abstract base classes. Each validator checks one condition and passes the request to the next handler if validation succeeds.",
-      code: `from abc import ABC, abstractmethod
-from dataclasses import dataclass
+        "An HTTP middleware pipeline where AuthHandler, RateLimitHandler, and LoggingHandler each inspect the request and decide whether to pass it to the next handler or reject it.",
+      code: `from __future__ import annotations
+
+from abc import ABC
+from dataclasses import dataclass, field
 
 
 @dataclass
-class RegistrationRequest:
-    username: str
-    email: str
-    password: str
-    age: int
+class Request:
+    method: str
+    path: str
+    headers: dict[str, str]
+    client_ip: str
 
 
-class ValidationHandler(ABC):
+class Handler(ABC):
     """Abstract handler with next-handler chaining."""
 
     def __init__(self) -> None:
-        self._next: ValidationHandler | None = None
+        self._next: Handler | None = None
 
-    def set_next(self, handler: "ValidationHandler") -> "ValidationHandler":
+    def set_next(self, handler: Handler) -> Handler:
         self._next = handler
         return handler  # allows chaining
 
-    def handle(self, request: RegistrationRequest) -> str | None:
+    def handle(self, request: Request) -> Request | None:
         if self._next:
             return self._next.handle(request)
-        return None  # all validations passed
-
-    @abstractmethod
-    def validate(self, request: RegistrationRequest) -> str | None:
-        """Return error message or None if valid."""
+        return request
 
 
-class UsernameValidator(ValidationHandler):
-    def handle(self, request: RegistrationRequest) -> str | None:
-        error = self.validate(request)
-        return error if error else super().handle(request)
+class AuthHandler(Handler):
+    """Checks for a valid Authorization header."""
 
-    def validate(self, request: RegistrationRequest) -> str | None:
-        if len(request.username) < 3:
-            return "Username must be at least 3 characters"
-        return None
-
-
-class EmailValidator(ValidationHandler):
-    def handle(self, request: RegistrationRequest) -> str | None:
-        error = self.validate(request)
-        return error if error else super().handle(request)
-
-    def validate(self, request: RegistrationRequest) -> str | None:
-        if "@" not in request.email:
-            return "Invalid email address"
-        return None
+    def handle(self, request: Request) -> Request | None:
+        auth = request.headers.get("Authorization")
+        if not auth:
+            print("[Auth] Rejected: missing Authorization header")
+            return None
+        print("[Auth] Passed: token present for {ip}".format(ip=request.client_ip))
+        return super().handle(request)
 
 
-class AgeValidator(ValidationHandler):
-    def handle(self, request: RegistrationRequest) -> str | None:
-        error = self.validate(request)
-        return error if error else super().handle(request)
+class RateLimitHandler(Handler):
+    """Tracks per-IP request counts and rejects above threshold."""
 
-    def validate(self, request: RegistrationRequest) -> str | None:
-        if request.age < 18:
-            return "Must be at least 18 years old"
-        return None
+    def __init__(self, limit: int = 100) -> None:
+        super().__init__()
+        self._counts: dict[str, int] = {}
+        self._limit = limit
+
+    def handle(self, request: Request) -> Request | None:
+        count = self._counts.get(request.client_ip, 0) + 1
+        self._counts[request.client_ip] = count
+        if count > self._limit:
+            print(
+                "[RateLimit] Rejected: {ip} exceeded {lim} requests".format(
+                    ip=request.client_ip, lim=self._limit
+                )
+            )
+            return None
+        print(
+            "[RateLimit] Passed: {ip} at {n}/{lim}".format(
+                ip=request.client_ip, n=count, lim=self._limit
+            )
+        )
+        return super().handle(request)
 
 
-# Build chain
-username_check = UsernameValidator()
-email_check = EmailValidator()
-age_check = AgeValidator()
-username_check.set_next(email_check).set_next(age_check)
+class LoggingHandler(Handler):
+    """Logs the request method and path, always passes through."""
 
-# Usage
-req = RegistrationRequest("al", "alice@mail.com", "secret123", 25)
-error = username_check.handle(req)
-print(error or "Registration valid!")
-# Username must be at least 3 characters
+    def handle(self, request: Request) -> Request | None:
+        print(
+            "[Logging] {method} {path} from {ip}".format(
+                method=request.method, path=request.path, ip=request.client_ip
+            )
+        )
+        return super().handle(request)
 
-req2 = RegistrationRequest("alice", "alice@mail.com", "secret123", 25)
-error2 = username_check.handle(req2)
-print(error2 or "Registration valid!")
-# Registration valid!`,
+
+# Build the chain: auth -> rate_limit -> logging
+auth = AuthHandler()
+rate_limit = RateLimitHandler()
+logging = LoggingHandler()
+auth.set_next(rate_limit).set_next(logging)
+
+# Valid request — passes all handlers
+print("--- Valid request ---")
+valid_req = Request(
+    method="GET",
+    path="/api/users",
+    headers={"Authorization": "Bearer abc123"},
+    client_ip="192.168.1.10",
+)
+auth.handle(valid_req)
+# [Auth] Passed: token present for 192.168.1.10
+# [RateLimit] Passed: 192.168.1.10 at 1/100
+# [Logging] GET /api/users from 192.168.1.10
+
+# Invalid request — rejected by AuthHandler
+print("\\n--- Invalid request ---")
+invalid_req = Request(
+    method="POST",
+    path="/api/admin",
+    headers={},
+    client_ip="10.0.0.5",
+)
+auth.handle(invalid_req)
+# [Auth] Rejected: missing Authorization header`,
     },
     {
       language: "php",
       filename: "ChainOfResponsibility.php",
       description:
-        "A support ticket escalation system. Each support tier tries to resolve the issue; if it cannot, it escalates to the next tier in the chain.",
+        "An HTTP middleware pipeline where AuthHandler, RateLimitHandler, and LoggingHandler each inspect the request and decide whether to pass it to the next handler or reject it.",
       code: `<?php
 
-// Handler interface
-interface SupportHandler
+// Request value object
+class Request
 {
-    public function setNext(SupportHandler \$handler): SupportHandler;
-    public function handle(string \$issue, int \$severity): string;
+    public function __construct(
+        public readonly string \$method,
+        public readonly string \$path,
+        /** @var array<string, string> */
+        public readonly array \$headers,
+        public readonly string \$clientIp,
+    ) {}
 }
 
-// Abstract base handler
-abstract class BaseSupportHandler implements SupportHandler
+// Handler interface
+interface Handler
 {
-    private ?SupportHandler \$next = null;
+    public function setNext(Handler \$handler): Handler;
+    public function handle(Request \$request): ?Request;
+}
 
-    public function setNext(SupportHandler \$handler): SupportHandler
+// Abstract base handler with chaining logic
+abstract class BaseHandler implements Handler
+{
+    private ?Handler \$next = null;
+
+    public function setNext(Handler \$handler): Handler
     {
         \$this->next = \$handler;
-        return \$handler;
+        return \$handler; // enables chaining
     }
 
-    public function handle(string \$issue, int \$severity): string
+    public function handle(Request \$request): ?Request
     {
         if (\$this->next !== null) {
-            return \$this->next->handle(\$issue, \$severity);
+            return \$this->next->handle(\$request);
         }
-        return "No handler could resolve: {\$issue}";
+        return \$request;
     }
 }
 
-// Concrete handlers
-class FrontlineSupport extends BaseSupportHandler
+// Checks for a valid Authorization header
+class AuthHandler extends BaseHandler
 {
-    public function handle(string \$issue, int \$severity): string
+    public function handle(Request \$request): ?Request
     {
-        if (\$severity <= 1) {
-            return "[Tier-1] Resolved '{\$issue}' with FAQ reference.";
+        if (!isset(\$request->headers['Authorization'])) {
+            echo "[Auth] Rejected: missing Authorization header\\n";
+            return null; // stops the chain
         }
-        echo "[Tier-1] Escalating '{\$issue}'...\\n";
-        return parent::handle(\$issue, \$severity);
+        echo "[Auth] Passed: token present for {\$request->clientIp}\\n";
+        return parent::handle(\$request);
     }
 }
 
-class TechnicalSupport extends BaseSupportHandler
+// Tracks per-IP request counts and rejects above threshold
+class RateLimitHandler extends BaseHandler
 {
-    public function handle(string \$issue, int \$severity): string
+    /** @var array<string, int> */
+    private array \$counts = [];
+    private int \$limit;
+
+    public function __construct(int \$limit = 100)
     {
-        if (\$severity <= 3) {
-            return "[Tier-2] Resolved '{\$issue}' with technical fix.";
+        \$this->limit = \$limit;
+    }
+
+    public function handle(Request \$request): ?Request
+    {
+        \$count = (\$this->counts[\$request->clientIp] ?? 0) + 1;
+        \$this->counts[\$request->clientIp] = \$count;
+        if (\$count > \$this->limit) {
+            echo "[RateLimit] Rejected: {\$request->clientIp} exceeded {\$this->limit} requests\\n";
+            return null;
         }
-        echo "[Tier-2] Escalating '{\$issue}'...\\n";
-        return parent::handle(\$issue, \$severity);
+        echo "[RateLimit] Passed: {\$request->clientIp} at {\$count}/{\$this->limit}\\n";
+        return parent::handle(\$request);
     }
 }
 
-class EngineeringTeam extends BaseSupportHandler
+// Logs the request method and path, always passes through
+class LoggingHandler extends BaseHandler
 {
-    public function handle(string \$issue, int \$severity): string
+    public function handle(Request \$request): ?Request
     {
-        return "[Engineering] Investigating '{\$issue}' — bug ticket created.";
+        echo "[Logging] {\$request->method} {\$request->path} from {\$request->clientIp}\\n";
+        return parent::handle(\$request);
     }
 }
 
-// Build chain
-\$frontline = new FrontlineSupport();
-\$technical = new TechnicalSupport();
-\$engineering = new EngineeringTeam();
+// Build the chain: auth -> rateLimit -> logging
+\$auth = new AuthHandler();
+\$rateLimit = new RateLimitHandler();
+\$logging = new LoggingHandler();
+\$auth->setNext(\$rateLimit)->setNext(\$logging);
 
-\$frontline->setNext(\$technical)->setNext(\$engineering);
+// Valid request — passes all handlers
+echo "--- Valid request ---\\n";
+\$validReq = new Request('GET', '/api/users', ['Authorization' => 'Bearer abc123'], '192.168.1.10');
+\$auth->handle(\$validReq);
+// [Auth] Passed: token present for 192.168.1.10
+// [RateLimit] Passed: 192.168.1.10 at 1/100
+// [Logging] GET /api/users from 192.168.1.10
 
-// Usage
-echo \$frontline->handle("Password reset", 1) . "\\n";
-// [Tier-1] Resolved 'Password reset' with FAQ reference.
-
-echo \$frontline->handle("API returns 500", 3) . "\\n";
-// [Tier-1] Escalating...
-// [Tier-2] Resolved 'API returns 500' with technical fix.
-
-echo \$frontline->handle("Data corruption", 5) . "\\n";
-// [Tier-1] Escalating...
-// [Tier-2] Escalating...
-// [Engineering] Investigating 'Data corruption' — bug ticket created.`,
+// Invalid request — rejected by AuthHandler
+echo "\\n--- Invalid request ---\\n";
+\$invalidReq = new Request('POST', '/api/admin', [], '10.0.0.5');
+\$auth->handle(\$invalidReq);
+// [Auth] Rejected: missing Authorization header`,
     },
     {
       language: "rust",
       filename: "chain_of_responsibility.rs",
       description:
-        "A logging chain using trait objects and Box<dyn Handler>. Each log handler checks the severity level and either processes the message or forwards it to the next handler.",
-      code: `/// Log severity levels.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-enum Level {
-    Debug,
-    Info,
-    Warning,
-    Error,
+        "An HTTP middleware pipeline where AuthHandler, RateLimitHandler, and LoggingHandler each inspect the request and decide whether to pass it to the next handler or reject it.",
+      code: `use std::collections::HashMap;
+
+/// HTTP request with method, path, headers, and client IP.
+struct Request {
+    method: String,
+    path: String,
+    headers: HashMap<String, String>,
+    client_ip: String,
 }
 
 /// Handler trait with optional next handler.
-trait LogHandler {
-    fn set_next(&mut self, next: Box<dyn LogHandler>);
-    fn handle(&self, level: Level, message: &str);
+trait Handler {
+    fn set_next(&mut self, next: Box<dyn Handler>);
+    fn handle(&mut self, request: &Request) -> bool;
 }
 
-struct ConsoleHandler {
-    threshold: Level,
-    next: Option<Box<dyn LogHandler>>,
+/// Checks for a valid Authorization header.
+struct AuthHandler {
+    next: Option<Box<dyn Handler>>,
 }
 
-impl ConsoleHandler {
-    fn new(threshold: Level) -> Self {
-        Self { threshold, next: None }
+impl AuthHandler {
+    fn new() -> Self {
+        Self { next: None }
     }
 }
 
-impl LogHandler for ConsoleHandler {
-    fn set_next(&mut self, next: Box<dyn LogHandler>) {
+impl Handler for AuthHandler {
+    fn set_next(&mut self, next: Box<dyn Handler>) {
         self.next = Some(next);
     }
 
-    fn handle(&self, level: Level, message: &str) {
-        if level >= self.threshold {
-            println!("[Console] {:?}: {}", level, message);
+    fn handle(&mut self, request: &Request) -> bool {
+        if !request.headers.contains_key("Authorization") {
+            println!("[Auth] Rejected: missing Authorization header");
+            return false;
         }
-        if let Some(ref next) = self.next {
-            next.handle(level, message);
+        println!("[Auth] Passed: token present for {}", request.client_ip);
+        match self.next {
+            Some(ref mut next) => next.handle(request),
+            None => true,
         }
     }
 }
 
-struct FileHandler {
-    threshold: Level,
-    filename: String,
-    next: Option<Box<dyn LogHandler>>,
+/// Tracks per-IP request counts and rejects above threshold.
+struct RateLimitHandler {
+    counts: HashMap<String, u32>,
+    limit: u32,
+    next: Option<Box<dyn Handler>>,
 }
 
-impl FileHandler {
-    fn new(threshold: Level, filename: &str) -> Self {
-        Self { threshold, filename: filename.to_string(), next: None }
+impl RateLimitHandler {
+    fn new(limit: u32) -> Self {
+        Self {
+            counts: HashMap::new(),
+            limit,
+            next: None,
+        }
     }
 }
 
-impl LogHandler for FileHandler {
-    fn set_next(&mut self, next: Box<dyn LogHandler>) {
+impl Handler for RateLimitHandler {
+    fn set_next(&mut self, next: Box<dyn Handler>) {
         self.next = Some(next);
     }
 
-    fn handle(&self, level: Level, message: &str) {
-        if level >= self.threshold {
-            println!("[File:{}] {:?}: {}", self.filename, level, message);
+    fn handle(&mut self, request: &Request) -> bool {
+        let count = self.counts.entry(request.client_ip.clone()).or_insert(0);
+        *count += 1;
+        if *count > self.limit {
+            println!(
+                "[RateLimit] Rejected: {} exceeded {} requests",
+                request.client_ip, self.limit
+            );
+            return false;
         }
-        if let Some(ref next) = self.next {
-            next.handle(level, message);
+        println!(
+            "[RateLimit] Passed: {} at {}/{}",
+            request.client_ip, count, self.limit
+        );
+        match self.next {
+            Some(ref mut next) => next.handle(request),
+            None => true,
         }
     }
 }
 
-struct AlertHandler {
-    next: Option<Box<dyn LogHandler>>,
+/// Logs the request method and path, always passes through.
+struct LoggingHandler {
+    next: Option<Box<dyn Handler>>,
 }
 
-impl LogHandler for AlertHandler {
-    fn set_next(&mut self, next: Box<dyn LogHandler>) {
+impl LoggingHandler {
+    fn new() -> Self {
+        Self { next: None }
+    }
+}
+
+impl Handler for LoggingHandler {
+    fn set_next(&mut self, next: Box<dyn Handler>) {
         self.next = Some(next);
     }
 
-    fn handle(&self, level: Level, message: &str) {
-        if level >= Level::Error {
-            println!("[ALERT] Paging on-call: {:?}: {}", level, message);
-        }
-        if let Some(ref next) = self.next {
-            next.handle(level, message);
+    fn handle(&mut self, request: &Request) -> bool {
+        println!(
+            "[Logging] {} {} from {}",
+            request.method, request.path, request.client_ip
+        );
+        match self.next {
+            Some(ref mut next) => next.handle(request),
+            None => true,
         }
     }
 }
 
 fn main() {
-    // Build chain: console -> file -> alert
-    let alert = AlertHandler { next: None };
-    let mut file = FileHandler::new(Level::Warning, "app.log");
-    file.set_next(Box::new(alert));
-    let mut console = ConsoleHandler::new(Level::Debug);
-    console.set_next(Box::new(file));
+    // Build chain: auth -> rate_limit -> logging
+    // Assemble inside-out because each handler owns the next.
+    let logging = LoggingHandler::new();
+    let mut rate_limit = RateLimitHandler::new(100);
+    rate_limit.set_next(Box::new(logging));
+    let mut auth = AuthHandler::new();
+    auth.set_next(Box::new(rate_limit));
 
-    console.handle(Level::Debug, "Startup complete");
-    // [Console] Debug: Startup complete
+    // Valid request — passes all handlers
+    println!("--- Valid request ---");
+    let valid_req = Request {
+        method: "GET".into(),
+        path: "/api/users".into(),
+        headers: HashMap::from([("Authorization".into(), "Bearer abc123".into())]),
+        client_ip: "192.168.1.10".into(),
+    };
+    auth.handle(&valid_req);
+    // [Auth] Passed: token present for 192.168.1.10
+    // [RateLimit] Passed: 192.168.1.10 at 1/100
+    // [Logging] GET /api/users from 192.168.1.10
 
-    console.handle(Level::Error, "Database connection lost");
-    // [Console] Error: Database connection lost
-    // [File:app.log] Error: Database connection lost
-    // [ALERT] Paging on-call: Error: Database connection lost
+    // Invalid request — rejected by AuthHandler
+    println!("\\n--- Invalid request ---");
+    let invalid_req = Request {
+        method: "POST".into(),
+        path: "/api/admin".into(),
+        headers: HashMap::new(),
+        client_ip: "10.0.0.5".into(),
+    };
+    auth.handle(&invalid_req);
+    // [Auth] Rejected: missing Authorization header
 }`,
     },
   ],

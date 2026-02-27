@@ -6,7 +6,7 @@ export const proxy: PatternDefinition = {
   slug: createPatternSlug("proxy"),
   name: "Proxy",
   category: createCategoryId("structural"),
-  emoji: "🛡️",
+  icon: "shield-halved",
   summary:
     "Provide a surrogate or placeholder for another object to control access to it.",
   intent:

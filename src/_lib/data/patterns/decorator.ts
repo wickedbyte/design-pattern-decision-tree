@@ -6,7 +6,7 @@ export const decorator: PatternDefinition = {
   slug: createPatternSlug("decorator"),
   name: "Decorator",
   category: createCategoryId("structural"),
-  emoji: "🎀",
+  icon: "layer-group",
   summary:
     "Attach additional responsibilities to an object dynamically, providing a flexible alternative to subclassing for extending functionality.",
   intent:

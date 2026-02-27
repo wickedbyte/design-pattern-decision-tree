@@ -4,9 +4,9 @@ import type { FlowNodeData } from "@/_lib/tree/to-react-flow";
 export function QuestionNode({ data }: NodeProps) {
   const d = data as FlowNodeData;
   return (
-    <div className="flex h-full items-center justify-center rounded-lg border border-structural/40 bg-bg-surface px-3 py-2 text-center text-sm text-text-primary shadow-md">
+    <div className="flex h-full items-center justify-center rounded-lg border border-border-primary bg-bg-surface px-3 py-2 text-center text-sm text-text-primary shadow-sm">
       <span>{d.label}</span>
-      <Handle type="target" position={Position.Top} className="!bg-structural" />
+      <Handle type="target" position={Position.Top} className="!bg-accent-purple" />
       <Handle
         type="source"
         position={Position.Bottom}

@@ -55,7 +55,7 @@ export function DecisionTreeDesktop() {
   }));
 
   return (
-    <div className="h-[700px] w-full rounded-xl border border-white/10 bg-bg-surface/30">
+    <div className="h-[700px] w-full rounded-xl border border-border-primary bg-bg-surface shadow-lg">
       <ReactFlow
         nodes={styledNodes}
         edges={styledEdges}
@@ -75,22 +75,22 @@ export function DecisionTreeDesktop() {
           nodeColor={(node) => {
             switch (node.type) {
               case "start":
-                return "#e94560";
+                return "var(--accent-rose)";
               case "category":
-                return "#3b82f6";
+                return "var(--accent-blue)";
               case "question":
-                return "#8b5cf6";
+                return "var(--accent-purple)";
               case "pattern":
-                return "#7ec8e3";
+                return "var(--accent-cyan)";
               case "fallback":
-                return "#6d28d9";
+                return "var(--structural-dark)";
               default:
-                return "#64748b";
+                return "var(--text-muted)";
             }
           }}
-          className="!bg-bg-elevated !border-white/10"
+          className="!bg-bg-elevated !border-border-primary"
         />
-        <Controls className="!bg-bg-elevated !border-white/10 !shadow-lg [&_button]:!bg-bg-elevated [&_button]:!border-white/10 [&_button]:!text-text-secondary" />
+        <Controls className="!bg-bg-surface !border-border-primary !shadow-sm [&_button]:!bg-bg-surface [&_button]:!border-border-primary [&_button]:!text-text-secondary" />
       </ReactFlow>
     </div>
   );

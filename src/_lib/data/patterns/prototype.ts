@@ -6,7 +6,7 @@ export const prototype: PatternDefinition = {
   slug: createPatternSlug("prototype"),
   name: "Prototype",
   category: createCategoryId("creational"),
-  emoji: "🧬",
+  icon: "copy",
   summary:
     "Specify the kinds of objects to create using a prototypical instance, and create new objects by copying this prototype.",
   intent:

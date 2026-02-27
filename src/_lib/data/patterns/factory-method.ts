@@ -6,7 +6,7 @@ export const factoryMethod: PatternDefinition = {
   slug: createPatternSlug("factory-method"),
   name: "Factory Method",
   category: createCategoryId("creational"),
-  emoji: "⚙️",
+  icon: "gear",
   summary:
     "Define an interface for creating an object, but let subclasses decide which class to instantiate. Factory Method lets a class defer instantiation to subclasses.",
   intent:

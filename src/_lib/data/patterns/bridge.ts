@@ -6,7 +6,7 @@ export const bridge: PatternDefinition = {
   slug: createPatternSlug("bridge"),
   name: "Bridge",
   category: createCategoryId("structural"),
-  emoji: "🌉",
+  icon: "bridge",
   summary:
     "Decouple an abstraction from its implementation so that the two can vary independently.",
   intent:

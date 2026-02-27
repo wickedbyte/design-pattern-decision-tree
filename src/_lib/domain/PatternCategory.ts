@@ -10,7 +10,7 @@ export interface CategoryInfo {
   readonly id: PatternCategoryId;
   readonly name: string;
   readonly description: string;
-  readonly emoji: string;
+  readonly icon: string;
 }
 
 const CATEGORY_INFO: Record<CategoryKey, CategoryInfo> = {
@@ -18,19 +18,19 @@ const CATEGORY_INFO: Record<CategoryKey, CategoryInfo> = {
     id: "creational" as PatternCategoryId,
     name: "Creational",
     description: "Creation logic is getting complex or scattered",
-    emoji: "\u{1F3D7}\u{FE0F}",
+    icon: "cubes",
   },
   structural: {
     id: "structural" as PatternCategoryId,
     name: "Structural",
     description: "Fighting component boundaries or external dependencies",
-    emoji: "\u{1F517}",
+    icon: "puzzle-piece",
   },
   behavioral: {
     id: "behavioral" as PatternCategoryId,
     name: "Behavioral",
     description: "Behavior keeps changing, conditionals keep growing",
-    emoji: "\u{26A1}",
+    icon: "bolt",
   },
 };
 

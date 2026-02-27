@@ -6,7 +6,7 @@ export const facade: PatternDefinition = {
   slug: createPatternSlug("facade"),
   name: "Facade",
   category: createCategoryId("structural"),
-  emoji: "🏛️",
+  icon: "building-columns",
   summary:
     "Provide a unified, simplified interface to a set of interfaces in a subsystem, making the subsystem easier to use.",
   intent:

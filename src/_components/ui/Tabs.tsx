@@ -18,7 +18,7 @@ export function Tabs({ tabs, children, defaultTab, className = "" }: TabsProps) 
       <div
         role="tablist"
         aria-label="Content tabs"
-        className="flex gap-1 border-b border-white/10 pb-px"
+        className="flex gap-1 border-b border-border-primary"
       >
         {tabs.map((tab) => (
           <button
@@ -41,10 +41,10 @@ export function Tabs({ tabs, children, defaultTab, className = "" }: TabsProps) 
                 setActiveId(prev.id);
               }
             }}
-            className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-blue ${
+            className={`relative rounded-t-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-blue ${
               activeId === tab.id
-                ? "bg-bg-surface text-text-primary"
-                : "text-text-muted hover:text-text-secondary"
+                ? "bg-bg-surface text-text-primary after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-accent-blue"
+                : "text-text-muted hover:text-text-secondary hover:bg-bg-inset"
             }`}
           >
             {tab.label}

@@ -6,7 +6,7 @@ export const composite: PatternDefinition = {
   slug: createPatternSlug("composite"),
   name: "Composite",
   category: createCategoryId("structural"),
-  emoji: "🌳",
+  icon: "sitemap",
   summary:
     "Compose objects into tree structures to represent part-whole hierarchies, letting clients treat individual objects and compositions uniformly.",
   intent:

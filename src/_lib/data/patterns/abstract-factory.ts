@@ -6,7 +6,7 @@ export const abstractFactory: PatternDefinition = {
   slug: createPatternSlug("abstract-factory"),
   name: "Abstract Factory",
   category: createCategoryId("creational"),
-  emoji: "🏭",
+  icon: "industry",
   summary:
     "Provide an interface for creating families of related or dependent objects without specifying their concrete classes.",
   intent:

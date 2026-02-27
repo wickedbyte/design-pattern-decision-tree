@@ -6,7 +6,7 @@ export const state: PatternDefinition = {
   slug: createPatternSlug("state"),
   name: "State",
   category: createCategoryId("behavioral"),
-  emoji: "🔄",
+  icon: "arrows-rotate",
   summary:
     "Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.",
   intent:
@@ -54,31 +54,32 @@ export const state: PatternDefinition = {
       language: "typescript",
       filename: "state.ts",
       description:
-        "A document workflow where the Document delegates actions to its current state object. Each state controls what operations are valid and which state comes next.",
+        "A document workflow where the Document delegates edit, submit, approve, and reject actions to its current state object. Each state controls which transitions are allowed.",
       code: `// State interface
 interface DocumentState {
   readonly name: string;
-  edit(doc: DocumentCtx): void;
-  submit(doc: DocumentCtx): void;
-  approve(doc: DocumentCtx): void;
-  reject(doc: DocumentCtx): void;
+  edit(doc: Document, text: string): void;
+  submit(doc: Document): void;
+  approve(doc: Document): void;
+  reject(doc: Document): void;
 }
 
 // Context
-class DocumentCtx {
+class Document {
   private state: DocumentState;
+  content = "";
 
   constructor() {
     this.state = new DraftState();
   }
 
   setState(state: DocumentState): void {
-    console.log(\`  Transition: \${this.state.name} -> \${state.name}\`);
+    console.log(\`  [Transition] \${this.state.name} -> \${state.name}\`);
     this.state = state;
   }
 
   getStateName(): string { return this.state.name; }
-  edit(): void { this.state.edit(this); }
+  edit(text: string): void { this.state.edit(this, text); }
   submit(): void { this.state.submit(this); }
   approve(): void { this.state.approve(this); }
   reject(): void { this.state.reject(this); }
@@ -87,8 +88,17 @@ class DocumentCtx {
 // Concrete states
 class DraftState implements DocumentState {
   readonly name = "Draft";
-  edit(doc: DocumentCtx): void { console.log("Editing draft..."); }
-  submit(doc: DocumentCtx): void { doc.setState(new ReviewState()); }
+
+  edit(doc: Document, text: string): void {
+    doc.content = text;
+    console.log("Draft edited.");
+  }
+
+  submit(doc: Document): void {
+    console.log("Submitting for review.");
+    doc.setState(new ReviewState());
+  }
+
   approve(): void { console.log("Cannot approve a draft."); }
   reject(): void { console.log("Cannot reject a draft."); }
 }
@@ -96,295 +106,368 @@ class DraftState implements DocumentState {
 class ReviewState implements DocumentState {
   readonly name = "Review";
   edit(): void { console.log("Cannot edit during review."); }
-  submit(): void { console.log("Already submitted."); }
-  approve(doc: DocumentCtx): void { doc.setState(new ApprovedState()); }
-  reject(doc: DocumentCtx): void { doc.setState(new DraftState()); }
+  submit(): void { console.log("Already under review."); }
+
+  approve(doc: Document): void {
+    console.log("Document approved for publication.");
+    doc.setState(new PublishedState());
+  }
+
+  reject(doc: Document): void {
+    console.log("Rejected — returning to draft.");
+    doc.setState(new DraftState());
+  }
 }
 
-class ApprovedState implements DocumentState {
-  readonly name = "Approved";
-  edit(): void { console.log("Cannot edit approved document."); }
-  submit(): void { console.log("Already approved."); }
-  approve(): void { console.log("Already approved."); }
-  reject(): void { console.log("Cannot reject approved document."); }
+class PublishedState implements DocumentState {
+  readonly name = "Published";
+  edit(): void { console.log("Cannot edit a published document."); }
+  submit(): void { console.log("Already published."); }
+  approve(): void { console.log("Already published."); }
+  reject(): void { console.log("Cannot reject a published document."); }
 }
 
 // Usage
-const doc = new DocumentCtx();
-doc.edit();     // Editing draft...
-doc.submit();   // Transition: Draft -> Review
-doc.approve();  // Transition: Review -> Approved
-doc.edit();     // Cannot edit approved document.`,
+const doc = new Document();
+doc.edit("Hello");  // Draft edited.
+doc.submit();       // Submitting for review.
+                    //   [Transition] Draft -> Review
+doc.edit("Nope");   // Cannot edit during review.
+doc.reject();       // Rejected — returning to draft.
+                    //   [Transition] Review -> Draft
+doc.edit("v2");     // Draft edited.
+doc.submit();       // Submitting for review.
+                    //   [Transition] Draft -> Review
+doc.approve();      // Document approved for publication.
+                    //   [Transition] Review -> Published
+doc.edit("Nope");   // Cannot edit a published document.`,
     },
     {
       language: "python",
       filename: "state.py",
       description:
-        "An order lifecycle using abstract base classes. Each state subclass governs which transitions are legal and advances the order to the next state.",
+        "A document workflow using abstract base classes. Each state subclass governs which transitions are legal and controls when the document advances to the next phase.",
       code: `from abc import ABC, abstractmethod
 
 
-class OrderState(ABC):
-    """Abstract state for an order."""
+class DocumentState(ABC):
+    """Abstract state for a document workflow."""
 
     @property
     @abstractmethod
     def name(self) -> str: ...
 
-    def pay(self, order: "Order") -> None:
-        print(f"Cannot pay in {self.name} state")
+    def edit(self, doc: "Document", text: str) -> None:
+        print(f"Cannot edit in {self.name} state.")
 
-    def ship(self, order: "Order") -> None:
-        print(f"Cannot ship in {self.name} state")
+    def submit(self, doc: "Document") -> None:
+        print(f"Cannot submit in {self.name} state.")
 
-    def deliver(self, order: "Order") -> None:
-        print(f"Cannot deliver in {self.name} state")
+    def approve(self, doc: "Document") -> None:
+        print(f"Cannot approve in {self.name} state.")
 
-    def cancel(self, order: "Order") -> None:
-        print(f"Cannot cancel in {self.name} state")
-
-
-class PendingState(OrderState):
-    name = "Pending"
-
-    def pay(self, order: "Order") -> None:
-        print("Payment received.")
-        order.state = PaidState()
-
-    def cancel(self, order: "Order") -> None:
-        print("Order cancelled.")
-        order.state = CancelledState()
+    def reject(self, doc: "Document") -> None:
+        print(f"Cannot reject in {self.name} state.")
 
 
-class PaidState(OrderState):
-    name = "Paid"
+class DraftState(DocumentState):
+    name = "Draft"
 
-    def ship(self, order: "Order") -> None:
-        print("Order shipped.")
-        order.state = ShippedState()
+    def edit(self, doc: "Document", text: str) -> None:
+        doc.content = text
+        print("Draft edited.")
 
-
-class ShippedState(OrderState):
-    name = "Shipped"
-
-    def deliver(self, order: "Order") -> None:
-        print("Order delivered.")
-        order.state = DeliveredState()
+    def submit(self, doc: "Document") -> None:
+        print("Submitting for review.")
+        doc.state = ReviewState()
 
 
-class DeliveredState(OrderState):
-    name = "Delivered"
+class ReviewState(DocumentState):
+    name = "Review"
+
+    def approve(self, doc: "Document") -> None:
+        print("Document approved for publication.")
+        doc.state = PublishedState()
+
+    def reject(self, doc: "Document") -> None:
+        print("Rejected -- returning to draft.")
+        doc.state = DraftState()
 
 
-class CancelledState(OrderState):
-    name = "Cancelled"
+class PublishedState(DocumentState):
+    name = "Published"
 
 
-class Order:
+class Document:
     """Context that delegates to the current state."""
 
     def __init__(self) -> None:
-        self.state: OrderState = PendingState()
+        self.state: DocumentState = DraftState()
+        self.content: str = ""
 
-    def pay(self) -> None:
-        self.state.pay(self)
+    def edit(self, text: str) -> None:
+        self.state.edit(self, text)
 
-    def ship(self) -> None:
-        self.state.ship(self)
+    def submit(self) -> None:
+        self.state.submit(self)
 
-    def deliver(self) -> None:
-        self.state.deliver(self)
+    def approve(self) -> None:
+        self.state.approve(self)
 
-    def cancel(self) -> None:
-        self.state.cancel(self)
+    def reject(self) -> None:
+        self.state.reject(self)
 
 
 # Usage
-order = Order()
-order.pay()      # Payment received.
-order.ship()     # Order shipped.
-order.deliver()  # Order delivered.
-order.cancel()   # Cannot cancel in Delivered state`,
+doc = Document()
+doc.edit("Hello")   # Draft edited.
+doc.submit()        # Submitting for review.
+doc.edit("Nope")    # Cannot edit in Review state.
+doc.reject()        # Rejected -- returning to draft.
+doc.edit("v2")      # Draft edited.
+doc.submit()        # Submitting for review.
+doc.approve()       # Document approved for publication.
+doc.edit("Nope")    # Cannot edit in Published state.`,
     },
     {
       language: "php",
       filename: "State.php",
       description:
-        "A vending machine state pattern. Each concrete state handles coin insertion, item selection, and dispensing differently depending on the machine's current phase.",
+        "A document workflow where each concrete state class handles edit, submit, approve, and reject actions. The Document context delegates all operations to its current state object.",
       code: `<?php
 
 // State interface
-interface VendingState
+interface DocumentState
 {
-    public function insertCoin(VendingMachine \$machine): void;
-    public function selectItem(VendingMachine \$machine): void;
-    public function dispense(VendingMachine \$machine): void;
+    public function edit(Document \$doc, string \$text): void;
+    public function submit(Document \$doc): void;
+    public function approve(Document \$doc): void;
+    public function reject(Document \$doc): void;
     public function getName(): string;
 }
 
 // Context
-class VendingMachine
+class Document
 {
-    private VendingState \$state;
+    private DocumentState \$state;
+    public string \$content = '';
 
     public function __construct()
     {
-        \$this->state = new IdleState();
+        \$this->state = new DraftState();
     }
 
-    public function setState(VendingState \$state): void
+    public function setState(DocumentState \$state): void
     {
-        echo "  [{$this->state->getName()} -> {\$state->getName()}]\\n";
+        echo "  [{\$this->state->getName()} -> {\$state->getName()}]\\n";
         \$this->state = \$state;
     }
 
-    public function insertCoin(): void { \$this->state->insertCoin(\$this); }
-    public function selectItem(): void { \$this->state->selectItem(\$this); }
-    public function dispense(): void { \$this->state->dispense(\$this); }
+    public function getStateName(): string { return \$this->state->getName(); }
+    public function edit(string \$text): void { \$this->state->edit(\$this, \$text); }
+    public function submit(): void { \$this->state->submit(\$this); }
+    public function approve(): void { \$this->state->approve(\$this); }
+    public function reject(): void { \$this->state->reject(\$this); }
 }
 
-class IdleState implements VendingState
+// Concrete states
+class DraftState implements DocumentState
 {
-    public function getName(): string { return 'Idle'; }
+    public function getName(): string { return 'Draft'; }
 
-    public function insertCoin(VendingMachine \$m): void
+    public function edit(Document \$doc, string \$text): void
     {
-        echo "Coin accepted.\\n";
-        \$m->setState(new HasCoinState());
+        \$doc->content = \$text;
+        echo "Draft edited.\\n";
     }
 
-    public function selectItem(VendingMachine \$m): void
+    public function submit(Document \$doc): void
     {
-        echo "Insert a coin first.\\n";
+        echo "Submitting for review.\\n";
+        \$doc->setState(new ReviewState());
     }
 
-    public function dispense(VendingMachine \$m): void
+    public function approve(Document \$doc): void
     {
-        echo "Insert a coin and select an item.\\n";
-    }
-}
-
-class HasCoinState implements VendingState
-{
-    public function getName(): string { return 'HasCoin'; }
-
-    public function insertCoin(VendingMachine \$m): void
-    {
-        echo "Coin already inserted.\\n";
+        echo "Cannot approve a draft.\\n";
     }
 
-    public function selectItem(VendingMachine \$m): void
+    public function reject(Document \$doc): void
     {
-        echo "Item selected.\\n";
-        \$m->setState(new DispensingState());
-    }
-
-    public function dispense(VendingMachine \$m): void
-    {
-        echo "Select an item first.\\n";
+        echo "Cannot reject a draft.\\n";
     }
 }
 
-class DispensingState implements VendingState
+class ReviewState implements DocumentState
 {
-    public function getName(): string { return 'Dispensing'; }
+    public function getName(): string { return 'Review'; }
 
-    public function insertCoin(VendingMachine \$m): void
+    public function edit(Document \$doc, string \$text): void
     {
-        echo "Please wait, dispensing...\\n";
+        echo "Cannot edit during review.\\n";
     }
 
-    public function selectItem(VendingMachine \$m): void
+    public function submit(Document \$doc): void
     {
-        echo "Already dispensing.\\n";
+        echo "Already under review.\\n";
     }
 
-    public function dispense(VendingMachine \$m): void
+    public function approve(Document \$doc): void
     {
-        echo "Item dispensed. Thank you!\\n";
-        \$m->setState(new IdleState());
+        echo "Document approved for publication.\\n";
+        \$doc->setState(new PublishedState());
+    }
+
+    public function reject(Document \$doc): void
+    {
+        echo "Rejected -- returning to draft.\\n";
+        \$doc->setState(new DraftState());
+    }
+}
+
+class PublishedState implements DocumentState
+{
+    public function getName(): string { return 'Published'; }
+
+    public function edit(Document \$doc, string \$text): void
+    {
+        echo "Cannot edit a published document.\\n";
+    }
+
+    public function submit(Document \$doc): void
+    {
+        echo "Already published.\\n";
+    }
+
+    public function approve(Document \$doc): void
+    {
+        echo "Already published.\\n";
+    }
+
+    public function reject(Document \$doc): void
+    {
+        echo "Cannot reject a published document.\\n";
     }
 }
 
 // Usage
-\$machine = new VendingMachine();
-\$machine->insertCoin(); // Coin accepted.
-\$machine->selectItem(); // Item selected.
-\$machine->dispense();   // Item dispensed. Thank you!`,
+\$doc = new Document();
+\$doc->edit('Hello');  // Draft edited.
+\$doc->submit();       // Submitting for review.
+                       //   [Draft -> Review]
+\$doc->edit('Nope');   // Cannot edit during review.
+\$doc->reject();       // Rejected -- returning to draft.
+                       //   [Review -> Draft]
+\$doc->edit('v2');     // Draft edited.
+\$doc->submit();       // Submitting for review.
+                       //   [Draft -> Review]
+\$doc->approve();      // Document approved for publication.
+                       //   [Review -> Published]
+\$doc->edit('Nope');   // Cannot edit a published document.`,
     },
     {
       language: "rust",
       filename: "state.rs",
       description:
-        "An enum-based state machine, which is the idiomatic Rust approach. The enum encodes all states, and a match expression handles transitions. This leverages Rust's exhaustive pattern matching to prevent missing state handlers.",
+        "A document workflow using an enum-based state machine, the idiomatic Rust approach. Each state variant controls which transitions are valid, and exhaustive pattern matching prevents missing state handlers.",
       code: `/// Idiomatic Rust favors enums over trait objects for state machines,
 /// because the compiler enforces exhaustive matching on all states.
 #[derive(Debug, Clone, PartialEq)]
-enum TrafficLight {
-    Green,
-    Yellow,
-    Red,
+enum DocState {
+    Draft,
+    Review,
+    Published,
 }
 
-impl TrafficLight {
-    fn next(self) -> Self {
+impl std::fmt::Display for DocState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            TrafficLight::Green => TrafficLight::Yellow,
-            TrafficLight::Yellow => TrafficLight::Red,
-            TrafficLight::Red => TrafficLight::Green,
-        }
-    }
-
-    fn action(&self) -> &str {
-        match self {
-            TrafficLight::Green => "GO — vehicles may proceed",
-            TrafficLight::Yellow => "CAUTION — prepare to stop",
-            TrafficLight::Red => "STOP — vehicles must wait",
-        }
-    }
-
-    fn duration_secs(&self) -> u64 {
-        match self {
-            TrafficLight::Green => 30,
-            TrafficLight::Yellow => 5,
-            TrafficLight::Red => 25,
+            DocState::Draft => write!(f, "Draft"),
+            DocState::Review => write!(f, "Review"),
+            DocState::Published => write!(f, "Published"),
         }
     }
 }
 
 /// Context that wraps the state enum.
-struct Intersection {
-    light: TrafficLight,
+struct Document {
+    state: DocState,
+    content: String,
 }
 
-impl Intersection {
+impl Document {
     fn new() -> Self {
-        Self { light: TrafficLight::Red }
+        Self {
+            state: DocState::Draft,
+            content: String::new(),
+        }
     }
 
-    fn advance(&mut self) {
-        let prev = self.light.clone();
-        self.light = self.light.clone().next();
-        println!(
-            "{:?} -> {:?} ({}s) | {}",
-            prev,
-            self.light,
-            self.light.duration_secs(),
-            self.light.action()
-        );
+    fn transition(&mut self, next: DocState) {
+        println!("  [Transition] {} -> {}", self.state, next);
+        self.state = next;
+    }
+
+    fn edit(&mut self, text: &str) {
+        match self.state {
+            DocState::Draft => {
+                self.content = text.to_string();
+                println!("Draft edited.");
+            }
+            DocState::Review => println!("Cannot edit during review."),
+            DocState::Published => println!("Cannot edit a published document."),
+        }
+    }
+
+    fn submit(&mut self) {
+        match self.state {
+            DocState::Draft => {
+                println!("Submitting for review.");
+                self.transition(DocState::Review);
+            }
+            DocState::Review => println!("Already under review."),
+            DocState::Published => println!("Already published."),
+        }
+    }
+
+    fn approve(&mut self) {
+        match self.state {
+            DocState::Draft => println!("Cannot approve a draft."),
+            DocState::Review => {
+                println!("Document approved for publication.");
+                self.transition(DocState::Published);
+            }
+            DocState::Published => println!("Already published."),
+        }
+    }
+
+    fn reject(&mut self) {
+        match self.state {
+            DocState::Draft => println!("Cannot reject a draft."),
+            DocState::Review => {
+                println!("Rejected -- returning to draft.");
+                self.transition(DocState::Draft);
+            }
+            DocState::Published => println!("Cannot reject a published document."),
+        }
     }
 }
 
 fn main() {
-    let mut intersection = Intersection::new();
+    let mut doc = Document::new();
 
-    for _ in 0..6 {
-        intersection.advance();
-    }
-    // Red -> Green (30s) | GO — vehicles may proceed
-    // Green -> Yellow (5s) | CAUTION — prepare to stop
-    // Yellow -> Red (25s) | STOP — vehicles must wait
-    // ...
+    doc.edit("Hello");  // Draft edited.
+    doc.submit();       // Submitting for review.
+                        //   [Transition] Draft -> Review
+    doc.edit("Nope");   // Cannot edit during review.
+    doc.reject();       // Rejected -- returning to draft.
+                        //   [Transition] Review -> Draft
+    doc.edit("v2");     // Draft edited.
+    doc.submit();       // Submitting for review.
+                        //   [Transition] Draft -> Review
+    doc.approve();      // Document approved for publication.
+                        //   [Transition] Review -> Published
+    doc.edit("Nope");   // Cannot edit a published document.
 }`,
     },
   ],

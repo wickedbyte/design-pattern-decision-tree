@@ -16,7 +16,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
         {items.map((item, i) => (
           <li key={i} className="flex items-center gap-1.5">
             {i > 0 && (
-              <span aria-hidden="true" className="text-text-muted/50">
+              <span aria-hidden="true" className="text-border-accent">
                 /
               </span>
             )}
@@ -28,7 +28,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                 {item.label}
               </Link>
             ) : (
-              <span className="text-text-secondary">{item.label}</span>
+              <span className="text-text-primary font-medium">{item.label}</span>
             )}
           </li>
         ))}

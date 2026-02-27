@@ -11,7 +11,7 @@ export function Card({
 }: CardProps) {
   return (
     <Tag
-      className={`rounded-xl border border-white/10 bg-bg-surface/60 p-6 backdrop-blur-xl ${className}`}
+      className={`rounded-xl border border-border-primary bg-bg-surface shadow-sm ${className}`}
     >
       {children}
     </Tag>

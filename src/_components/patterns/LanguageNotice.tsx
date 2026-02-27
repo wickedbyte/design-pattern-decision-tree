@@ -11,9 +11,9 @@ export function LanguageNotice({ notice }: LanguageNoticeProps) {
   return (
     <div
       role="note"
-      className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4"
+      className="rounded-lg border border-accent-amber/30 bg-accent-amber/5 p-4"
     >
-      <p className="text-sm font-medium text-yellow-200">
+      <p className="text-sm font-semibold text-accent-amber">
         Note for {langInfo.displayName}
       </p>
       <p className="mt-1 text-sm text-text-secondary">{notice.reason}</p>

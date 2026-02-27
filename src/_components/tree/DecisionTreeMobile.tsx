@@ -15,9 +15,9 @@ function getChildren(nodeId: string): { node: DecisionNode; edgeLabel?: string }
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  creational: "border-creational bg-creational/10",
-  structural: "border-structural bg-structural/10",
-  behavioral: "border-behavioral bg-behavioral/10",
+  creational: "border-creational-border bg-creational-bg",
+  structural: "border-structural-border bg-structural-bg",
+  behavioral: "border-behavioral-border bg-behavioral-bg",
 };
 
 export function DecisionTreeMobile() {
@@ -36,7 +36,7 @@ export function DecisionTreeMobile() {
       {path.length > 0 && (
         <div className="mb-4 flex items-center gap-2 text-sm text-text-muted">
           <span>Step {path.length}</span>
-          <span aria-hidden="true">•</span>
+          <span aria-hidden="true">·</span>
           <button
             onClick={reset}
             className="text-accent-blue hover:underline"
@@ -55,7 +55,7 @@ export function DecisionTreeMobile() {
           transition={{ duration: 0.2 }}
         >
           {/* Current question / result */}
-          <div className="rounded-xl border border-white/10 bg-bg-surface p-6">
+          <div className="rounded-xl border border-border-primary bg-bg-surface p-6 shadow-sm">
             {currentNode.kind === "start" && (
               <h2 className="text-xl font-bold text-text-primary">
                 {currentNode.label}
@@ -83,13 +83,12 @@ export function DecisionTreeMobile() {
 
             {currentNode.kind === "pattern" && (
               <div className="text-center">
-                <div className="mb-2 text-2xl">✅</div>
-                <h2 className="text-xl font-bold text-accent-cyan">
+                <h2 className="text-xl font-bold text-accent-blue">
                   {currentNode.label}
                 </h2>
                 <Link
                   href={`/patterns/${currentNode.patternSlug}`}
-                  className="mt-4 inline-block rounded-lg bg-accent-blue px-6 py-2 text-sm font-medium text-white hover:bg-accent-blue/80 transition-colors"
+                  className="mt-4 inline-block rounded-lg bg-accent-blue px-6 py-2 text-sm font-medium text-text-inverse transition-colors hover:opacity-90"
                 >
                   View Full Details
                 </Link>
@@ -98,7 +97,6 @@ export function DecisionTreeMobile() {
 
             {currentNode.kind === "fallback" && (
               <div className="text-center">
-                <div className="mb-2 text-2xl">🔄</div>
                 <h2 className="text-lg font-bold text-text-primary">
                   {currentNode.label}
                 </h2>
@@ -120,10 +118,10 @@ export function DecisionTreeMobile() {
                   onClick={() =>
                     selectNode(node.id, edgeLabel as "Yes" | "No" | undefined)
                   }
-                  className={`w-full rounded-xl border p-4 text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  className={`w-full rounded-xl border p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 ${
                     node.kind === "category"
-                      ? CATEGORY_COLORS[node.categoryId as string] ?? "border-white/10 bg-bg-elevated"
-                      : "border-white/10 bg-bg-elevated hover:border-white/20"
+                      ? CATEGORY_COLORS[node.categoryId as string] ?? "border-border-primary bg-bg-elevated"
+                      : "border-border-primary bg-bg-elevated hover:border-border-accent"
                   }`}
                   aria-label={edgeLabel ? `${edgeLabel}: ${node.label}` : node.label}
                 >
@@ -131,8 +129,8 @@ export function DecisionTreeMobile() {
                     <span
                       className={`inline-block mb-1 rounded px-2 py-0.5 text-xs font-bold ${
                         edgeLabel === "Yes"
-                          ? "bg-accent-green/20 text-accent-green"
-                          : "bg-accent-rose/20 text-accent-rose"
+                          ? "bg-accent-green/15 text-accent-green"
+                          : "bg-accent-rose/15 text-accent-rose"
                       }`}
                     >
                       {edgeLabel}
@@ -157,7 +155,7 @@ export function DecisionTreeMobile() {
               onClick={goBack}
               className="mt-4 text-sm text-text-muted hover:text-text-secondary transition-colors"
             >
-              ← Back
+              &larr; Back
             </button>
           )}
         </motion.div>

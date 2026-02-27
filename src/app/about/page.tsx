@@ -14,10 +14,10 @@ export default function AboutPage() {
         About
       </h1>
 
-      <div className="mt-8 max-w-3xl space-y-8">
-        <section>
-          <h2 className="text-xl font-bold text-text-primary">
-            The Pain-Point-First Approach
+      <div className="mt-8 space-y-8">
+        <section className="rounded-lg border-l-4 border-l-accent-blue border-y border-r border-y-border-primary border-r-border-primary bg-bg-surface p-6 shadow-sm">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
+            Methodology
           </h2>
           <p className="mt-3 text-text-secondary leading-relaxed">
             Design patterns don&apos;t fail because they&apos;re wrong &mdash; they fail
@@ -31,15 +31,17 @@ export default function AboutPage() {
           </p>
         </section>
 
-        <section>
-          <h2 className="text-xl font-bold text-text-primary">Attribution</h2>
+        <section className="rounded-lg border-l-4 border-l-accent-purple border-y border-r border-y-border-primary border-r-border-primary bg-bg-surface p-6 shadow-sm">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
+            Attribution
+          </h2>
           <p className="mt-3 text-text-secondary leading-relaxed">
             This project is inspired by{" "}
             <a
               href="https://medium.com/womenintechnology/stop-memorizing-design-patterns-use-this-decision-tree-instead-e84f22fca9fa"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent-blue underline underline-offset-2 hover:text-accent-blue/80 transition-colors"
+              className="text-accent-blue underline underline-offset-2 hover:opacity-80 transition-opacity"
             >
               &ldquo;Stop Memorizing Design Patterns: Use This Decision Tree
               Instead&rdquo;
@@ -52,41 +54,31 @@ export default function AboutPage() {
           </p>
         </section>
 
-        <section>
-          <h2 className="text-xl font-bold text-text-primary">
+        <section className="rounded-lg border-l-4 border-l-accent-green border-y border-r border-y-border-primary border-r-border-primary bg-bg-surface p-6 shadow-sm">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-text-muted">
             What This Site Adds
           </h2>
-          <ul className="mt-3 list-inside list-disc space-y-2 text-text-secondary">
-            <li>
-              Interactive decision tree with desktop flowchart and mobile wizard
-              views
+          <ul className="mt-3 space-y-2 text-text-secondary">
+            <li className="flex gap-2">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
+              <span>Interactive decision tree with desktop flowchart and mobile wizard views</span>
             </li>
-            <li>
-              Complete pattern documentation with intent, problem, solution, and
-              real-world analogies
+            <li className="flex gap-2">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
+              <span>Complete pattern documentation with intent, problem, solution, and real-world analogies</span>
             </li>
-            <li>
-              Code examples in four languages: TypeScript, Python, PHP, and Rust
+            <li className="flex gap-2">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
+              <span>Code examples in four languages: TypeScript, Python, PHP, and Rust</span>
             </li>
-            <li>
-              Language-specific notes where patterns are anti-patterns or require
-              idiomatic alternatives
+            <li className="flex gap-2">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
+              <span>Language-specific notes where patterns are anti-patterns or require idiomatic alternatives</span>
             </li>
-            <li>
-              Architecture designed to easily add new patterns beyond the
-              original 17
+            <li className="flex gap-2">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
+              <span>Architecture designed to easily add new patterns beyond the original 17</span>
             </li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="text-xl font-bold text-text-primary">Technology</h2>
-          <ul className="mt-3 list-inside list-disc space-y-2 text-text-secondary">
-            <li>Built with Next.js (static export) and TypeScript</li>
-            <li>Interactive tree powered by React Flow and dagre layout</li>
-            <li>Syntax highlighting with Shiki</li>
-            <li>Styled with Tailwind CSS v4</li>
-            <li>Animations with Motion (with reduced-motion support)</li>
           </ul>
         </section>
       </div>

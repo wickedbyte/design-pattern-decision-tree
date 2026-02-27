@@ -6,7 +6,7 @@ export const command: PatternDefinition = {
   slug: createPatternSlug("command"),
   name: "Command",
   category: createCategoryId("behavioral"),
-  emoji: "📋",
+  icon: "terminal",
   summary:
     "Encapsulate a request as an object, thereby letting you parameterize clients with different requests, queue or log requests, and support undoable operations.",
   intent:
@@ -58,7 +58,7 @@ export const command: PatternDefinition = {
       language: "typescript",
       filename: "command.ts",
       description:
-        "A text editor with undo/redo support. Each operation (insert, delete) is a command object that knows how to execute and reverse itself.",
+        "A text editor with undo support. InsertCommand and DeleteCommand operate on a TextDocument receiver, while the Editor invoker maintains a history stack.",
       code: `// Command interface
 interface Command {
   execute(): void;
@@ -70,16 +70,20 @@ class TextDocument {
   private content = "";
 
   insert(text: string, position: number): void {
-    this.content = this.content.slice(0, position) + text + this.content.slice(position);
+    this.content =
+      this.content.slice(0, position) + text + this.content.slice(position);
   }
 
   delete(position: number, length: number): string {
     const deleted = this.content.slice(position, position + length);
-    this.content = this.content.slice(0, position) + this.content.slice(position + length);
+    this.content =
+      this.content.slice(0, position) + this.content.slice(position + length);
     return deleted;
   }
 
-  toString(): string { return this.content; }
+  toString(): string {
+    return this.content;
+  }
 }
 
 // Concrete commands
@@ -87,11 +91,16 @@ class InsertCommand implements Command {
   constructor(
     private doc: TextDocument,
     private text: string,
-    private position: number
+    private position: number,
   ) {}
 
-  execute(): void { this.doc.insert(this.text, this.position); }
-  undo(): void { this.doc.delete(this.position, this.text.length); }
+  execute(): void {
+    this.doc.insert(this.text, this.position);
+  }
+
+  undo(): void {
+    this.doc.delete(this.position, this.text.length);
+  }
 }
 
 class DeleteCommand implements Command {
@@ -100,32 +109,32 @@ class DeleteCommand implements Command {
   constructor(
     private doc: TextDocument,
     private position: number,
-    private length: number
+    private length: number,
   ) {}
 
-  execute(): void { this.deleted = this.doc.delete(this.position, this.length); }
-  undo(): void { this.doc.insert(this.deleted, this.position); }
+  execute(): void {
+    this.deleted = this.doc.delete(this.position, this.length);
+  }
+
+  undo(): void {
+    this.doc.insert(this.deleted, this.position);
+  }
 }
 
-// Invoker with undo/redo
+// Invoker
 class Editor {
   private history: Command[] = [];
-  private redoStack: Command[] = [];
 
-  executeCommand(cmd: Command): void {
+  execute(cmd: Command): void {
     cmd.execute();
     this.history.push(cmd);
-    this.redoStack = []; // clear redo stack on new action
   }
 
   undo(): void {
     const cmd = this.history.pop();
-    if (cmd) { cmd.undo(); this.redoStack.push(cmd); }
-  }
-
-  redo(): void {
-    const cmd = this.redoStack.pop();
-    if (cmd) { cmd.execute(); this.history.push(cmd); }
+    if (cmd) {
+      cmd.undo();
+    }
   }
 }
 
@@ -133,21 +142,20 @@ class Editor {
 const doc = new TextDocument();
 const editor = new Editor();
 
-editor.executeCommand(new InsertCommand(doc, "Hello", 0));
-editor.executeCommand(new InsertCommand(doc, " World", 5));
-console.log(doc.toString()); // "Hello World"
+editor.execute(new InsertCommand(doc, "Hello", 0));
+console.log(String(doc)); // "Hello"
+
+editor.execute(new InsertCommand(doc, " World", 5));
+console.log(String(doc)); // "Hello World"
 
 editor.undo();
-console.log(doc.toString()); // "Hello"
-
-editor.redo();
-console.log(doc.toString()); // "Hello World"`,
+console.log(String(doc)); // "Hello"`,
     },
     {
       language: "python",
       filename: "command.py",
       description:
-        "A remote control simulator using abstract base classes. Commands encapsulate device operations and support undo for each action.",
+        "A text editor with undo support. InsertCommand and DeleteCommand operate on a TextDocument receiver, while the Editor invoker maintains a history stack.",
       code: `from abc import ABC, abstractmethod
 
 
@@ -161,60 +169,63 @@ class Command(ABC):
     def undo(self) -> None: ...
 
 
-# Receivers
-class Light:
-    def __init__(self, room: str) -> None:
-        self.room = room
-        self.brightness = 0
+# Receiver
+class TextDocument:
+    def __init__(self) -> None:
+        self._content = ""
 
-    def on(self) -> None:
-        self.brightness = 100
-        print(f"{self.room} light ON (brightness: {self.brightness}%)")
+    def insert(self, text: str, position: int) -> None:
+        self._content = (
+            self._content[:position] + text + self._content[position:]
+        )
 
-    def off(self) -> None:
-        self.brightness = 0
-        print(f"{self.room} light OFF")
+    def delete(self, position: int, length: int) -> str:
+        deleted = self._content[position : position + length]
+        self._content = (
+            self._content[:position] + self._content[position + length :]
+        )
+        return deleted
 
-    def dim(self, level: int) -> None:
-        self.brightness = level
-        print(f"{self.room} light dimmed to {level}%")
+    def __str__(self) -> str:
+        return self._content
 
 
 # Concrete commands
-class LightOnCommand(Command):
-    def __init__(self, light: Light) -> None:
-        self._light = light
-        self._prev_brightness = 0
+class InsertCommand(Command):
+    def __init__(self, doc: TextDocument, text: str, position: int) -> None:
+        self._doc = doc
+        self._text = text
+        self._position = position
 
     def execute(self) -> None:
-        self._prev_brightness = self._light.brightness
-        self._light.on()
+        self._doc.insert(self._text, self._position)
 
     def undo(self) -> None:
-        self._light.dim(self._prev_brightness)
+        self._doc.delete(self._position, len(self._text))
 
 
-class LightOffCommand(Command):
-    def __init__(self, light: Light) -> None:
-        self._light = light
-        self._prev_brightness = 0
+class DeleteCommand(Command):
+    def __init__(self, doc: TextDocument, position: int, length: int) -> None:
+        self._doc = doc
+        self._position = position
+        self._length = length
+        self._deleted = ""
 
     def execute(self) -> None:
-        self._prev_brightness = self._light.brightness
-        self._light.off()
+        self._deleted = self._doc.delete(self._position, self._length)
 
     def undo(self) -> None:
-        self._light.dim(self._prev_brightness)
+        self._doc.insert(self._deleted, self._position)
 
 
 # Invoker
-class RemoteControl:
+class Editor:
     def __init__(self) -> None:
         self._history: list[Command] = []
 
-    def press(self, command: Command) -> None:
-        command.execute()
-        self._history.append(command)
+    def execute(self, cmd: Command) -> None:
+        cmd.execute()
+        self._history.append(cmd)
 
     def undo(self) -> None:
         if self._history:
@@ -222,18 +233,23 @@ class RemoteControl:
 
 
 # Usage
-living_room = Light("Living Room")
-remote = RemoteControl()
+doc = TextDocument()
+editor = Editor()
 
-remote.press(LightOnCommand(living_room))   # Living Room light ON
-remote.press(LightOffCommand(living_room))  # Living Room light OFF
-remote.undo()  # Living Room light dimmed to 100%`,
+editor.execute(InsertCommand(doc, "Hello", 0))
+print(doc)  # Hello
+
+editor.execute(InsertCommand(doc, " World", 5))
+print(doc)  # Hello World
+
+editor.undo()
+print(doc)  # Hello`,
     },
     {
       language: "php",
       filename: "Command.php",
       description:
-        "A file system command pattern with execute/undo. Commands wrap file operations and an invoker maintains a history stack for reversal.",
+        "A text editor with undo support. InsertCommand and DeleteCommand operate on a TextDocument receiver, while the Editor invoker maintains a history stack.",
       code: `<?php
 
 // Command interface
@@ -244,75 +260,76 @@ interface Command
 }
 
 // Receiver
-class FileSystem
+class TextDocument
 {
-    /** @var array<string, string> */
-    private array \$files = [];
+    private string \$content = '';
 
-    public function createFile(string \$name, string \$content): void
+    public function insert(string \$text, int \$position): void
     {
-        \$this->files[\$name] = \$content;
-        echo "Created: {\$name}\\n";
+        \$this->content =
+            substr(\$this->content, 0, \$position)
+            . \$text
+            . substr(\$this->content, \$position);
     }
 
-    public function deleteFile(string \$name): ?string
+    public function delete(int \$position, int \$length): string
     {
-        \$content = \$this->files[\$name] ?? null;
-        unset(\$this->files[\$name]);
-        echo "Deleted: {\$name}\\n";
-        return \$content;
+        \$deleted = substr(\$this->content, \$position, \$length);
+        \$this->content =
+            substr(\$this->content, 0, \$position)
+            . substr(\$this->content, \$position + \$length);
+        return \$deleted;
     }
 
-    public function listFiles(): void
+    public function __toString(): string
     {
-        echo "Files: " . implode(', ', array_keys(\$this->files)) . "\\n";
+        return \$this->content;
     }
 }
 
 // Concrete commands
-class CreateFileCommand implements Command
+class InsertCommand implements Command
 {
     public function __construct(
-        private FileSystem \$fs,
-        private string \$name,
-        private string \$content,
+        private TextDocument \$doc,
+        private string \$text,
+        private int \$position,
     ) {}
 
     public function execute(): void
     {
-        \$this->fs->createFile(\$this->name, \$this->content);
+        \$this->doc->insert(\$this->text, \$this->position);
     }
 
     public function undo(): void
     {
-        \$this->fs->deleteFile(\$this->name);
+        \$this->doc->delete(\$this->position, strlen(\$this->text));
     }
 }
 
-class DeleteFileCommand implements Command
+class DeleteCommand implements Command
 {
-    private ?string \$backup = null;
+    private string \$deleted = '';
 
     public function __construct(
-        private FileSystem \$fs,
-        private string \$name,
+        private TextDocument \$doc,
+        private int \$position,
+        private int \$length,
     ) {}
 
     public function execute(): void
     {
-        \$this->backup = \$this->fs->deleteFile(\$this->name);
+        \$this->deleted = \$this->doc->delete(\$this->position, \$this->length);
     }
 
     public function undo(): void
     {
-        if (\$this->backup !== null) {
-            \$this->fs->createFile(\$this->name, \$this->backup);
-        }
+        \$this->doc->insert(\$this->deleted, \$this->position);
     }
 }
 
 // Invoker
-class CommandHistory
+class Editor
 {
     /** @var Command[] */
     private array \$history = [];
@@ -331,95 +348,136 @@ class CommandHistory
 }
 
 // Usage
-\$fs = new FileSystem();
-\$history = new CommandHistory();
+\$doc = new TextDocument();
+\$editor = new Editor();
 
-\$history->execute(new CreateFileCommand(\$fs, 'readme.md', '# Hello'));
-\$history->execute(new CreateFileCommand(\$fs, 'config.json', '{}'));
-\$fs->listFiles(); // Files: readme.md, config.json
+\$editor->execute(new InsertCommand(\$doc, 'Hello', 0));
+echo \$doc . "\\n"; // Hello
 
-\$history->undo(); // Deleted: config.json
-\$fs->listFiles(); // Files: readme.md`,
+\$editor->execute(new InsertCommand(\$doc, ' World', 5));
+echo \$doc . "\\n"; // Hello World
+
+\$editor->undo();
+echo \$doc . "\\n"; // Hello`,
     },
     {
       language: "rust",
       filename: "command.rs",
       description:
-        "A calculator with undo support using a Command trait. Each operation stores enough state to reverse itself, and the invoker maintains a history stack.",
+        "A text editor with undo support. InsertCommand and DeleteCommand operate on a TextDocument receiver, while the Editor invoker maintains a history stack.",
       code: `/// Command trait with execute and undo.
 trait Command {
-    fn execute(&mut self, value: &mut f64);
-    fn undo(&mut self, value: &mut f64);
+    fn execute(&mut self, doc: &mut TextDocument);
+    fn undo(&mut self, doc: &mut TextDocument);
 }
 
-struct AddCommand {
-    amount: f64,
+/// Receiver — holds the text content.
+struct TextDocument {
+    content: String,
 }
 
-impl Command for AddCommand {
-    fn execute(&mut self, value: &mut f64) {
-        *value += self.amount;
+impl TextDocument {
+    fn new() -> Self {
+        Self { content: String::new() }
     }
-    fn undo(&mut self, value: &mut f64) {
-        *value -= self.amount;
+
+    fn insert(&mut self, text: &str, position: usize) {
+        self.content.insert_str(position, text);
     }
-}
 
-struct MultiplyCommand {
-    factor: f64,
-    prev_value: f64, // stored for undo
-}
-
-impl MultiplyCommand {
-    fn new(factor: f64) -> Self {
-        Self { factor, prev_value: 0.0 }
+    fn delete(&mut self, position: usize, length: usize) -> String {
+        let deleted: String = self.content[position..position + length]
+            .to_string();
+        self.content.replace_range(position..position + length, "");
+        deleted
     }
 }
 
-impl Command for MultiplyCommand {
-    fn execute(&mut self, value: &mut f64) {
-        self.prev_value = *value;
-        *value *= self.factor;
-    }
-    fn undo(&mut self, value: &mut f64) {
-        *value = self.prev_value;
+impl std::fmt::Display for TextDocument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.content)
     }
 }
 
-/// Invoker that tracks command history for undo.
-struct Calculator {
-    value: f64,
+// Concrete commands
+
+struct InsertCommand {
+    text: String,
+    position: usize,
+}
+
+impl InsertCommand {
+    fn new(text: &str, position: usize) -> Self {
+        Self { text: text.to_string(), position }
+    }
+}
+
+impl Command for InsertCommand {
+    fn execute(&mut self, doc: &mut TextDocument) {
+        doc.insert(&self.text, self.position);
+    }
+
+    fn undo(&mut self, doc: &mut TextDocument) {
+        doc.delete(self.position, self.text.len());
+    }
+}
+
+struct DeleteCommand {
+    position: usize,
+    length: usize,
+    deleted: String,
+}
+
+impl DeleteCommand {
+    fn new(position: usize, length: usize) -> Self {
+        Self { position, length, deleted: String::new() }
+    }
+}
+
+impl Command for DeleteCommand {
+    fn execute(&mut self, doc: &mut TextDocument) {
+        self.deleted = doc.delete(self.position, self.length);
+    }
+
+    fn undo(&mut self, doc: &mut TextDocument) {
+        doc.insert(&self.deleted, self.position);
+    }
+}
+
+/// Invoker — stores command history for undo.
+struct Editor {
     history: Vec<Box<dyn Command>>,
 }
 
-impl Calculator {
-    fn new(initial: f64) -> Self {
-        Self { value: initial, history: Vec::new() }
+impl Editor {
+    fn new() -> Self {
+        Self { history: Vec::new() }
     }
 
-    fn execute(&mut self, mut cmd: Box<dyn Command>) {
-        cmd.execute(&mut self.value);
+    fn execute(&mut self, mut cmd: Box<dyn Command>, doc: &mut TextDocument) {
+        cmd.execute(doc);
         self.history.push(cmd);
-        println!("= {}", self.value);
     }
 
-    fn undo(&mut self) {
+    fn undo(&mut self, doc: &mut TextDocument) {
         if let Some(mut cmd) = self.history.pop() {
-            cmd.undo(&mut self.value);
-            println!("Undo -> {}", self.value);
+            cmd.undo(doc);
         }
     }
 }
 
 fn main() {
-    let mut calc = Calculator::new(10.0);
+    let mut doc = TextDocument::new();
+    let mut editor = Editor::new();
 
-    calc.execute(Box::new(AddCommand { amount: 5.0 }));       // = 15
-    calc.execute(Box::new(MultiplyCommand::new(3.0)));         // = 45
-    calc.execute(Box::new(AddCommand { amount: -10.0 }));      // = 35
+    editor.execute(Box::new(InsertCommand::new("Hello", 0)), &mut doc);
+    println!("{doc}"); // Hello
 
-    calc.undo(); // Undo -> 45
-    calc.undo(); // Undo -> 15
+    editor.execute(Box::new(InsertCommand::new(" World", 5)), &mut doc);
+    println!("{doc}"); // Hello World
+
+    editor.undo(&mut doc);
+    println!("{doc}"); // Hello
 }`,
     },
   ],

@@ -6,7 +6,7 @@ export interface PatternDefinition {
   readonly slug: PatternSlug;
   readonly name: string;
   readonly category: PatternCategoryId;
-  readonly emoji: string;
+  readonly icon: string;
   readonly summary: string;
   readonly intent: string;
   readonly problem: string;

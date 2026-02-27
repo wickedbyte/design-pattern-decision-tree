@@ -6,7 +6,7 @@ export const adapter: PatternDefinition = {
   slug: createPatternSlug("adapter"),
   name: "Adapter",
   category: createCategoryId("structural"),
-  emoji: "🔌",
+  icon: "plug",
   summary:
     "Convert the interface of a class into another interface clients expect, enabling classes to work together that otherwise could not due to incompatible interfaces.",
   intent:

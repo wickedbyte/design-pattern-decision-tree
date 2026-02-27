@@ -6,7 +6,7 @@ export const templateMethod: PatternDefinition = {
   slug: createPatternSlug("template-method"),
   name: "Template Method",
   category: createCategoryId("behavioral"),
-  emoji: "📐",
+  icon: "ruler-combined",
   summary:
     "Define the skeleton of an algorithm in a method, deferring some steps to subclasses. Template Method lets subclasses redefine certain steps of an algorithm without changing the algorithm's structure.",
   intent:
@@ -55,12 +55,12 @@ export const templateMethod: PatternDefinition = {
       language: "typescript",
       filename: "template-method.ts",
       description:
-        "A data mining framework where the template method defines the fixed pipeline (open, extract, parse, analyze, report) and subclasses implement the format-specific steps.",
+        "A data mining framework where the template method defines the fixed pipeline (open, extract, parse, analyze, report) and CsvMiner/JsonMiner implement the format-specific steps.",
       code: `// Abstract class with the template method
 abstract class DataMiner {
   // Template method — defines the algorithm skeleton
   mine(path: string): void {
-    const raw = this.openFile(path);
+    const raw = this.openSource(path);
     const data = this.extractData(raw);
     const parsed = this.parseData(data);
     const analysis = this.analyzeData(parsed);
@@ -68,11 +68,11 @@ abstract class DataMiner {
   }
 
   // Steps to be implemented by subclasses
-  protected abstract openFile(path: string): string;
+  protected abstract openSource(path: string): string;
   protected abstract extractData(raw: string): string[];
   protected abstract parseData(data: string[]): Record<string, number>[];
 
-  // Shared steps with default implementation
+  // Shared step with default implementation
   protected analyzeData(data: Record<string, number>[]): string {
     const total = data.reduce((sum, row) => sum + (row["value"] ?? 0), 0);
     return \`Total records: \${data.length}, Sum of values: \${total}\`;
@@ -86,32 +86,34 @@ abstract class DataMiner {
 
 // Concrete: CSV miner
 class CsvMiner extends DataMiner {
-  protected openFile(path: string): string {
-    console.log(\`Opening CSV: \${path}\`);
-    return "name,value\\nalice,10\\nbob,20"; // simulated
+  protected openSource(path: string): string {
+    console.log(\`Opening CSV file: \${path}\`);
+    return "name,value\\nalice,10\\nbob,20"; // simulated file content
   }
 
   protected extractData(raw: string): string[] {
-    return raw.split("\\n").slice(1); // skip header
+    return raw.split("\\n").slice(1); // skip header row
   }
 
   protected parseData(data: string[]): Record<string, number>[] {
     return data.map((row) => {
-      const [name, val] = row.split(",");
-      return { name: name.length, value: Number(val) };
+      const [, val] = row.split(",");
+      return { value: Number(val) };
     });
   }
 }
 
 // Concrete: JSON miner
 class JsonMiner extends DataMiner {
-  protected openFile(path: string): string {
-    console.log(\`Opening JSON: \${path}\`);
+  protected openSource(path: string): string {
+    console.log(\`Opening JSON file: \${path}\`);
     return '[{"name":"alice","value":10},{"name":"bob","value":20}]';
   }
 
   protected extractData(raw: string): string[] {
-    return JSON.parse(raw).map((item: Record<string, unknown>) => JSON.stringify(item));
+    return JSON.parse(raw).map(
+      (item: Record<string, unknown>) => JSON.stringify(item),
+    );
   }
 
   protected parseData(data: string[]): Record<string, number>[] {
@@ -121,288 +123,309 @@ class JsonMiner extends DataMiner {
 
 // Usage
 new CsvMiner().mine("data.csv");
-// Opening CSV: data.csv
+// Opening CSV file: data.csv
 // [Report] Total records: 2, Sum of values: 30
 
 new JsonMiner().mine("data.json");
-// Opening JSON: data.json
+// Opening JSON file: data.json
 // [Report] Total records: 2, Sum of values: 30`,
     },
     {
       language: "python",
       filename: "template_method.py",
       description:
-        "A game AI framework using abstract base classes. The template method defines the turn sequence, and each character type implements its own strategy for each phase.",
+        "A data mining framework using abstract base classes. The template method defines the fixed pipeline (open, extract, parse, analyze, report) and CsvMiner/JsonMiner implement the format-specific steps.",
       code: `from abc import ABC, abstractmethod
+import json
 
 
-class GameAI(ABC):
-    """Abstract class defining the turn algorithm skeleton."""
+class DataMiner(ABC):
+    """Abstract class defining the mining algorithm skeleton."""
 
-    def take_turn(self) -> None:
-        """Template method — fixed turn sequence."""
-        resources = self.collect_resources()
-        self.build_structures(resources)
-        units = self.train_units()
-        target = self.scout_enemy()
-        self.attack(units, target)
-
-    @abstractmethod
-    def collect_resources(self) -> int:
-        """Return amount of resources collected."""
+    def mine(self, path: str) -> None:
+        """Template method -- fixed mining pipeline."""
+        raw = self.open_source(path)
+        data = self.extract_data(raw)
+        parsed = self.parse_data(data)
+        analysis = self.analyze_data(parsed)
+        self.generate_report(analysis)
 
     @abstractmethod
-    def build_structures(self, resources: int) -> None: ...
+    def open_source(self, path: str) -> str:
+        """Open the data source and return raw content."""
 
     @abstractmethod
-    def train_units(self) -> list[str]: ...
-
-    # Hook — default implementation, can be overridden
-    def scout_enemy(self) -> str:
-        return "nearest base"
+    def extract_data(self, raw: str) -> list[str]:
+        """Extract individual records from raw content."""
 
     @abstractmethod
-    def attack(self, units: list[str], target: str) -> None: ...
+    def parse_data(self, data: list[str]) -> list[dict[str, int]]:
+        """Parse records into structured data."""
+
+    # Shared step with default implementation
+    def analyze_data(self, data: list[dict[str, int]]) -> str:
+        total = sum(row.get("value", 0) for row in data)
+        return "Total records: {}, Sum of values: {}".format(len(data), total)
+
+    # Hook -- subclasses can optionally override
+    def generate_report(self, analysis: str) -> None:
+        print("[Report] {}".format(analysis))
 
 
-class OrcsAI(GameAI):
-    def collect_resources(self) -> int:
-        print("Orcs: mining gold and chopping wood")
-        return 150
+class CsvMiner(DataMiner):
+    def open_source(self, path: str) -> str:
+        print("Opening CSV file: {}".format(path))
+        return "name,value\\nalice,10\\nbob,20"  # simulated
 
-    def build_structures(self, resources: int) -> None:
-        print(f"Orcs: building barracks (cost: {resources // 2})")
+    def extract_data(self, raw: str) -> list[str]:
+        return raw.split("\\n")[1:]  # skip header row
 
-    def train_units(self) -> list[str]:
-        units = ["grunt", "grunt", "shaman"]
-        print(f"Orcs: trained {units}")
-        return units
+    def parse_data(self, data: list[str]) -> list[dict[str, int]]:
+        result: list[dict[str, int]] = []
+        for row in data:
+            _, val = row.split(",")
+            result.append({"value": int(val)})
+        return result
 
-    def attack(self, units: list[str], target: str) -> None:
-        print(f"Orcs: {len(units)} units charging {target}!")
 
+class JsonMiner(DataMiner):
+    def open_source(self, path: str) -> str:
+        print("Opening JSON file: {}".format(path))
+        return '[{"name": "alice", "value": 10}, {"name": "bob", "value": 20}]'
 
-class HumansAI(GameAI):
-    def collect_resources(self) -> int:
-        print("Humans: farming and trading")
-        return 200
+    def extract_data(self, raw: str) -> list[str]:
+        return [json.dumps(item) for item in json.loads(raw)]
 
-    def build_structures(self, resources: int) -> None:
-        print(f"Humans: building castle (cost: {resources // 2})")
-
-    def train_units(self) -> list[str]:
-        units = ["knight", "archer", "archer"]
-        print(f"Humans: trained {units}")
-        return units
-
-    def scout_enemy(self) -> str:
-        print("Humans: scouting with eagle eye")
-        return "weakest flank"
-
-    def attack(self, units: list[str], target: str) -> None:
-        print(f"Humans: {len(units)} units advancing to {target}!")
+    def parse_data(self, data: list[str]) -> list[dict[str, int]]:
+        return [json.loads(d) for d in data]
 
 
 # Usage
-print("=== Orcs Turn ===")
-OrcsAI().take_turn()
-print("\\n=== Humans Turn ===")
-HumansAI().take_turn()`,
+CsvMiner().mine("data.csv")
+# Opening CSV file: data.csv
+# [Report] Total records: 2, Sum of values: 30
+
+print()
+
+JsonMiner().mine("data.json")
+# Opening JSON file: data.json
+# [Report] Total records: 2, Sum of values: 30`,
     },
     {
       language: "php",
       filename: "TemplateMethod.php",
       description:
-        "A report generator framework. The abstract class defines the report structure (header, body, footer), and concrete classes implement format-specific rendering.",
+        "A data mining framework where the abstract class defines the fixed pipeline (open, extract, parse, analyze, report) and CsvMiner/JsonMiner implement the format-specific steps.",
       code: `<?php
 
 // Abstract class with the template method
-abstract class ReportGenerator
+abstract class DataMiner
 {
+    /** Template method — defines the mining pipeline. */
+    final public function mine(string $path): void
+    {
+        $raw = $this->openSource($path);
+        $data = $this->extractData($raw);
+        $parsed = $this->parseData($data);
+        $analysis = $this->analyzeData($parsed);
+        $this->generateReport($analysis);
+    }
+
+    abstract protected function openSource(string $path): string;
+
+    /** @return list<string> */
+    abstract protected function extractData(string $raw): array;
+
     /**
-     * Template method — defines the report structure.
-     * @param array<string, mixed> $data
+     * @param list<string> $data
+     * @return list<array{value: int}>
      */
-    final public function generate(array $data, string $title): string
+    abstract protected function parseData(array $data): array;
+
+    /** Shared step with default implementation.
+     * @param list<array{value: int}> $data
+     */
+    protected function analyzeData(array $data): string
     {
-        $output = $this->buildHeader($title);
-        $output .= $this->buildBody($data);
-        $output .= $this->buildFooter();
-        $output .= $this->addTimestamp(); // hook
-        return $output;
+        $total = array_sum(array_column($data, 'value'));
+        return sprintf('Total records: %d, Sum of values: %d', count($data), $total);
     }
 
-    abstract protected function buildHeader(string $title): string;
-
-    /** @param array<string, mixed> $data */
-    abstract protected function buildBody(array $data): string;
-
-    abstract protected function buildFooter(): string;
-
-    // Hook — optional override
-    protected function addTimestamp(): string
+    /** Hook — subclasses can optionally override. */
+    protected function generateReport(string $analysis): void
     {
-        return '';
+        echo "[Report] {$analysis}" . PHP_EOL;
     }
 }
 
-// Concrete: HTML report
-class HtmlReport extends ReportGenerator
+// Concrete: CSV miner
+class CsvMiner extends DataMiner
 {
-    protected function buildHeader(string $title): string
+    protected function openSource(string $path): string
     {
-        return "<html><head><title>{$title}</title></head><body>\n<h1>{$title}</h1>\n";
+        echo "Opening CSV file: {$path}" . PHP_EOL;
+        return "name,value\\nalice,10\\nbob,20"; // simulated
     }
 
-    protected function buildBody(array $data): string
+    protected function extractData(string $raw): array
     {
-        $rows = '';
-        foreach ($data as $key => $value) {
-            $rows .= "<tr><td>{$key}</td><td>{$value}</td></tr>\n";
-        }
-        return "<table>\n{$rows}</table>\n";
-    }
-
-    protected function buildFooter(): string
-    {
-        return "</body></html>\n";
-    }
-}
-
-// Concrete: Plain text report
-class TextReport extends ReportGenerator
-{
-    protected function buildHeader(string $title): string
-    {
-        $line = str_repeat('=', strlen($title));
-        return "{$line}\n{$title}\n{$line}\n";
-    }
-
-    protected function buildBody(array $data): string
-    {
-        $lines = '';
-        foreach ($data as $key => $value) {
-            $lines .= sprintf("%-15s %s\n", $key . ':', $value);
-        }
+        $lines = explode("\\n", $raw);
+        array_shift($lines); // skip header row
         return $lines;
     }
 
-    protected function buildFooter(): string
+    protected function parseData(array $data): array
     {
-        return str_repeat('-', 30) . "\n";
+        return array_map(function (string $row): array {
+            [, $val] = explode(',', $row);
+            return ['value' => (int) $val];
+        }, $data);
+    }
+}
+
+// Concrete: JSON miner
+class JsonMiner extends DataMiner
+{
+    protected function openSource(string $path): string
+    {
+        echo "Opening JSON file: {$path}" . PHP_EOL;
+        return '[{"name":"alice","value":10},{"name":"bob","value":20}]';
     }
 
-    protected function addTimestamp(): string
+    protected function extractData(string $raw): array
     {
-        return 'Generated: ' . date('Y-m-d H:i:s') . "\n";
+        return array_map('json_encode', json_decode($raw, true));
+    }
+
+    protected function parseData(array $data): array
+    {
+        return array_map(fn(string $d): array => json_decode($d, true), $data);
     }
 }
 
 // Usage
-$data = ['Revenue' => '$12,500', 'Expenses' => '$8,300', 'Profit' => '$4,200'];
+(new CsvMiner())->mine('data.csv');
+// Opening CSV file: data.csv
+// [Report] Total records: 2, Sum of values: 30
 
-$html = new HtmlReport();
-echo $html->generate($data, 'Q4 Report') . "\n";
+echo PHP_EOL;
 
-$text = new TextReport();
-echo $text->generate($data, 'Q4 Report');`,
+(new JsonMiner())->mine('data.json');
+// Opening JSON file: data.json
+// [Report] Total records: 2, Sum of values: 30`,
     },
     {
       language: "rust",
       filename: "template_method.rs",
       description:
-        "A data processing pipeline using trait default methods as the template method. Required methods serve as the abstract steps that implementors must define.",
-      code: `/// Trait with a default 'process' method acting as the template method.
+        "A data mining framework using a trait with a default mine() method as the template method. CsvMiner and JsonMiner implement the format-specific steps as required trait methods.",
+      code: `use std::collections::HashMap;
+
+/// Trait with a default \`mine\` method acting as the template method.
 /// Required methods are the customizable steps.
-trait DataProcessor {
-    /// Template method — fixed pipeline structure.
-    fn process(&self, source: &str) -> String {
-        let raw = self.read_data(source);
-        let cleaned = self.clean_data(&raw);
-        let transformed = self.transform_data(&cleaned);
-        self.format_output(&transformed)
+trait DataMiner {
+    /// Template method — fixed mining pipeline.
+    fn mine(&self, path: &str) {
+        let raw = self.open_source(path);
+        let data = self.extract_data(&raw);
+        let parsed = self.parse_data(&data);
+        let analysis = self.analyze_data(&parsed);
+        self.generate_report(&analysis);
     }
 
     // Required steps — implementors must define these
-    fn read_data(&self, source: &str) -> Vec<String>;
-    fn clean_data(&self, data: &[String]) -> Vec<String>;
-    fn transform_data(&self, data: &[String]) -> Vec<(String, usize)>;
+    fn open_source(&self, path: &str) -> String;
+    fn extract_data(&self, raw: &str) -> Vec<String>;
+    fn parse_data(&self, data: &[String]) -> Vec<HashMap<String, i64>>;
 
-    // Hook with default implementation
-    fn format_output(&self, data: &[(String, usize)]) -> String {
-        data.iter()
-            .map(|(word, count)| format!("{}: {}", word, count))
-            .collect::<Vec<_>>()
-            .join(", ")
+    // Shared step with default implementation
+    fn analyze_data(&self, data: &[HashMap<String, i64>]) -> String {
+        let total: i64 = data
+            .iter()
+            .filter_map(|row| row.get("value"))
+            .sum();
+        format!("Total records: {}, Sum of values: {}", data.len(), total)
+    }
+
+    // Hook — implementors can optionally override
+    fn generate_report(&self, analysis: &str) {
+        println!("[Report] {}", analysis);
     }
 }
 
-/// Concrete: word frequency counter
-struct WordCounter;
+/// Concrete: CSV miner
+struct CsvMiner;
 
-impl DataProcessor for WordCounter {
-    fn read_data(&self, source: &str) -> Vec<String> {
-        println!("Reading words from: {}", source);
-        source.split_whitespace().map(String::from).collect()
+impl DataMiner for CsvMiner {
+    fn open_source(&self, path: &str) -> String {
+        println!("Opening CSV file: {}", path);
+        "name,value\\nalice,10\\nbob,20".to_string() // simulated
     }
 
-    fn clean_data(&self, data: &[String]) -> Vec<String> {
+    fn extract_data(&self, raw: &str) -> Vec<String> {
+        raw.lines().skip(1).map(String::from).collect() // skip header
+    }
+
+    fn parse_data(&self, data: &[String]) -> Vec<HashMap<String, i64>> {
         data.iter()
-            .map(|w| w.to_lowercase().replace(|c: char| !c.is_alphanumeric(), ""))
-            .filter(|w| !w.is_empty())
+            .map(|row| {
+                let parts: Vec<&str> = row.split(',').collect();
+                let mut map = HashMap::new();
+                map.insert("value".to_string(), parts[1].parse().unwrap());
+                map
+            })
             .collect()
-    }
-
-    fn transform_data(&self, data: &[String]) -> Vec<(String, usize)> {
-        let mut counts = std::collections::HashMap::new();
-        for word in data {
-            *counts.entry(word.clone()).or_insert(0usize) += 1;
-        }
-        let mut sorted: Vec<_> = counts.into_iter().collect();
-        sorted.sort_by(|a, b| b.1.cmp(&a.1)); // descending
-        sorted
     }
 }
 
-/// Concrete: character frequency counter
-struct CharCounter;
+/// Concrete: JSON miner
+struct JsonMiner;
 
-impl DataProcessor for CharCounter {
-    fn read_data(&self, source: &str) -> Vec<String> {
-        println!("Reading characters from: {}", source);
-        source.chars().map(|c| c.to_string()).collect()
+impl DataMiner for JsonMiner {
+    fn open_source(&self, path: &str) -> String {
+        println!("Opening JSON file: {}", path);
+        r#"[{"name":"alice","value":10},{"name":"bob","value":20}]"#.to_string()
     }
 
-    fn clean_data(&self, data: &[String]) -> Vec<String> {
-        data.iter()
-            .filter(|c| c.trim() != "")
-            .cloned()
+    fn extract_data(&self, raw: &str) -> Vec<String> {
+        // Simple manual parsing for demonstration
+        raw.trim_matches(|c| c == '[' || c == ']')
+            .split("},{")
+            .map(|s| {
+                let trimmed = s.trim_matches(|c| c == '{' || c == '}');
+                format!("{{{}}}", trimmed)
+            })
             .collect()
     }
 
-    fn transform_data(&self, data: &[String]) -> Vec<(String, usize)> {
-        let mut counts = std::collections::HashMap::new();
-        for ch in data {
-            *counts.entry(ch.clone()).or_insert(0usize) += 1;
-        }
-        let mut sorted: Vec<_> = counts.into_iter().collect();
-        sorted.sort_by(|a, b| b.1.cmp(&a.1));
-        sorted
+    fn parse_data(&self, data: &[String]) -> Vec<HashMap<String, i64>> {
+        data.iter()
+            .map(|entry| {
+                let mut map = HashMap::new();
+                for pair in entry.trim_matches(|c| c == '{' || c == '}').split(',') {
+                    let kv: Vec<&str> = pair.split(':').collect();
+                    let key = kv[0].trim().trim_matches('"');
+                    let val = kv[1].trim().trim_matches('"');
+                    if let Ok(n) = val.parse::<i64>() {
+                        map.insert(key.to_string(), n);
+                    }
+                }
+                map
+            })
+            .collect()
     }
 }
 
 fn main() {
-    let text = "hello world hello rust world";
+    CsvMiner.mine("data.csv");
+    // Opening CSV file: data.csv
+    // [Report] Total records: 2, Sum of values: 30
 
-    let words = WordCounter;
-    println!("{}\n", words.process(text));
-    // Reading words from: hello world hello rust world
-    // hello: 2, world: 2, rust: 1
+    println!();
 
-    let chars = CharCounter;
-    println!("{}", chars.process(text));
-    // Reading characters from: hello world hello rust world
-    // l: 5, o: 3, ...
+    JsonMiner.mine("data.json");
+    // Opening JSON file: data.json
+    // [Report] Total records: 2, Sum of values: 30
 }`,
     },
   ],

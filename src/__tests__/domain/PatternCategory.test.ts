@@ -21,7 +21,7 @@ describe("PatternCategory", () => {
     const info = getCategoryInfo(createCategoryId("creational"));
     expect(info.name).toBe("Creational");
     expect(info.description).toBeTruthy();
-    expect(info.emoji).toBeTruthy();
+    expect(info.icon).toBeTruthy();
   });
 
   it("returns all 3 categories", () => {
@@ -33,7 +33,7 @@ describe("PatternCategory", () => {
       expect(cat.id).toBeTruthy();
       expect(cat.name).toBeTruthy();
       expect(cat.description).toBeTruthy();
-      expect(cat.emoji).toBeTruthy();
+      expect(cat.icon).toBeTruthy();
     }
   });
 });

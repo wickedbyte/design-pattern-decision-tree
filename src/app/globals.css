@@ -1,46 +1,105 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --bg-primary: #fafafa;
+  /* Light mode */
+  --bg-primary: #f8fafc;
   --bg-secondary: #f1f5f9;
   --bg-surface: #ffffff;
   --bg-elevated: #ffffff;
+  --bg-inset: #f1f5f9;
+  --bg-code: #fafbfc;
 
   --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-inverse: #f8fafc;
 
-  --accent-rose: #e94560;
-  --accent-blue: #3b82f6;
-  --accent-purple: #8b5cf6;
-  --accent-cyan: #7ec8e3;
-  --accent-green: #10b981;
+  --border-primary: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --border-accent: #cbd5e1;
 
-  --creational: #3b82f6;
+  --accent-rose: #e11d48;
+  --accent-blue: #2563eb;
+  --accent-purple: #7c3aed;
+  --accent-cyan: #0891b2;
+  --accent-green: #059669;
+  --accent-amber: #d97706;
+
+  --creational: #2563eb;
   --creational-dark: #1e40af;
-  --creational-light: #93c5fd;
+  --creational-light: #3b82f6;
+  --creational-bg: #eff6ff;
+  --creational-border: #bfdbfe;
 
-  --structural: #8b5cf6;
+  --structural: #7c3aed;
   --structural-dark: #6d28d9;
-  --structural-light: #c4b5fd;
+  --structural-light: #8b5cf6;
+  --structural-bg: #f5f3ff;
+  --structural-border: #ddd6fe;
 
-  --behavioral: #e94560;
-  --behavioral-dark: #be123c;
-  --behavioral-light: #fda4af;
+  --behavioral: #16a34a;
+  --behavioral-dark: #15803d;
+  --behavioral-light: #22c55e;
+  --behavioral-bg: #f0fdf4;
+  --behavioral-border: #bbf7d0;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+  --shadow-glow: none;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 .dark {
-  --bg-primary: #0a0a1a;
-  --bg-secondary: #111827;
-  --bg-surface: #1a1a2e;
-  --bg-elevated: #1e293b;
+  --bg-primary: #0b0d14;
+  --bg-secondary: #12151e;
+  --bg-surface: #171b26;
+  --bg-elevated: #1c2030;
+  --bg-inset: #12151e;
+  --bg-code: #13161f;
 
-  --text-primary: #e0e0e0;
+  --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
+  --text-inverse: #0f172a;
+
+  --border-primary: #1e293b;
+  --border-subtle: #1a1f2e;
+  --border-accent: #334155;
+
+  --accent-rose: #fb7185;
+  --accent-blue: #60a5fa;
+  --accent-purple: #a78bfa;
+  --accent-cyan: #22d3ee;
+  --accent-green: #34d399;
+  --accent-amber: #fbbf24;
+
+  --creational: #60a5fa;
+  --creational-dark: #3b82f6;
+  --creational-light: #93c5fd;
+  --creational-bg: rgba(59, 130, 246, 0.08);
+  --creational-border: rgba(59, 130, 246, 0.2);
+
+  --structural: #a78bfa;
+  --structural-dark: #8b5cf6;
+  --structural-light: #c4b5fd;
+  --structural-bg: rgba(139, 92, 246, 0.08);
+  --structural-border: rgba(139, 92, 246, 0.2);
+
+  --behavioral: #22c55e;
+  --behavioral-dark: #16a34a;
+  --behavioral-light: #4ade80;
+  --behavioral-bg: rgba(22, 163, 74, 0.08);
+  --behavioral-border: rgba(22, 163, 74, 0.2);
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  --shadow-glow: 0 0 20px -5px rgba(96, 165, 250, 0.15);
 }
 
 @theme inline {
@@ -48,28 +107,47 @@
   --color-bg-secondary: var(--bg-secondary);
   --color-bg-surface: var(--bg-surface);
   --color-bg-elevated: var(--bg-elevated);
+  --color-bg-inset: var(--bg-inset);
+  --color-bg-code: var(--bg-code);
 
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+
+  --color-border-primary: var(--border-primary);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-accent: var(--border-accent);
 
   --color-accent-rose: var(--accent-rose);
   --color-accent-blue: var(--accent-blue);
   --color-accent-purple: var(--accent-purple);
   --color-accent-cyan: var(--accent-cyan);
   --color-accent-green: var(--accent-green);
+  --color-accent-amber: var(--accent-amber);
 
   --color-creational: var(--creational);
   --color-creational-dark: var(--creational-dark);
   --color-creational-light: var(--creational-light);
+  --color-creational-bg: var(--creational-bg);
+  --color-creational-border: var(--creational-border);
 
   --color-structural: var(--structural);
   --color-structural-dark: var(--structural-dark);
   --color-structural-light: var(--structural-light);
+  --color-structural-bg: var(--structural-bg);
+  --color-structural-border: var(--structural-border);
 
   --color-behavioral: var(--behavioral);
   --color-behavioral-dark: var(--behavioral-dark);
   --color-behavioral-light: var(--behavioral-light);
+  --color-behavioral-bg: var(--behavioral-bg);
+  --color-behavioral-border: var(--behavioral-border);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-glow: var(--shadow-glow);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -79,4 +157,17 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Shiki dual-theme support */
+.shiki,
+.shiki span {
+  color: var(--shiki-light) !important;
+  background-color: transparent !important;
+}
+
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: transparent !important;
 }

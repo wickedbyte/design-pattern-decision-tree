@@ -11,9 +11,9 @@ test.describe("Navigation", () => {
     await page.goto("/");
 
     // Navigate to Patterns
-    await page.getByRole("link", { name: "Patterns", exact: true }).first().click();
+    await page.getByRole("link", { name: "Design Pattern Catalog" }).first().click();
     await expect(page).toHaveURL("/patterns");
-    await expect(page.locator("h1")).toContainText("Pattern Catalog");
+    await expect(page.locator("h1")).toContainText("Design Pattern Catalog");
 
     // Navigate to About
     await page.getByRole("link", { name: "About" }).first().click();

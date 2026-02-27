@@ -11,7 +11,7 @@ export function DecisionTreeContainer() {
 
   if (!mounted) {
     return (
-      <div className="h-[500px] w-full animate-pulse rounded-xl bg-bg-surface/30" />
+      <div className="h-[500px] w-full animate-pulse rounded-xl border border-border-primary bg-bg-surface shadow-sm" />
     );
   }
 

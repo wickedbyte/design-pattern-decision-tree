@@ -6,7 +6,7 @@ export const observer: PatternDefinition = {
   slug: createPatternSlug("observer"),
   name: "Observer",
   category: createCategoryId("behavioral"),
-  emoji: "👁️",
+  icon: "eye",
   summary:
     "Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.",
   intent:
@@ -55,10 +55,16 @@ export const observer: PatternDefinition = {
       language: "typescript",
       filename: "observer.ts",
       description:
-        "An EventEmitter-style implementation where a Subject manages typed subscriptions and notifies all registered observers when an event is published.",
+        "A UserService event emitter that notifies Logger and EmailNotifier observers when a user_registered event fires, demonstrating typed subscriptions and observer management.",
       code: `// Observer interface
 interface Observer<T> {
-  update(data: T): void;
+  update(event: string, data: T): void;
+}
+
+// Event data
+interface UserData {
+  id: number;
+  email: string;
 }
 
 // Subject that manages subscriptions and notifications
@@ -73,230 +79,331 @@ class EventEmitter<T> {
     this.observers.delete(observer);
   }
 
-  notify(data: T): void {
+  emit(event: string, data: T): void {
     for (const observer of this.observers) {
-      observer.update(data);
+      observer.update(event, data);
     }
   }
 }
 
-// Concrete observer
-class Logger implements Observer<string> {
-  update(message: string): void {
-    console.log(\`[LOG] \${message}\`);
+// Concrete observer: logs events to the console
+class Logger implements Observer<UserData> {
+  update(event: string, data: UserData): void {
+    console.log(\`[Logger] \${event}: user #\${data.id} (\${data.email})\`);
   }
 }
 
-class AlertService implements Observer<string> {
-  update(message: string): void {
-    console.log(\`[ALERT] \${message}\`);
+// Concrete observer: sends a welcome email
+class EmailNotifier implements Observer<UserData> {
+  update(event: string, data: UserData): void {
+    console.log(\`[EmailNotifier] Sending welcome email to \${data.email}\`);
+  }
+}
+
+// Concrete subject: emits events when users register
+class UserService {
+  private emitter = new EventEmitter<UserData>();
+
+  subscribe(observer: Observer<UserData>): void {
+    this.emitter.subscribe(observer);
+  }
+
+  unsubscribe(observer: Observer<UserData>): void {
+    this.emitter.unsubscribe(observer);
+  }
+
+  register(id: number, email: string): void {
+    const user: UserData = { id, email };
+    console.log(\`UserService: registered user #\${id}\`);
+    this.emitter.emit("user_registered", user);
   }
 }
 
 // Usage
-const emitter = new EventEmitter<string>();
+const userService = new UserService();
 const logger = new Logger();
-const alerts = new AlertService();
+const emailNotifier = new EmailNotifier();
 
-emitter.subscribe(logger);
-emitter.subscribe(alerts);
-emitter.notify("User signed up");
-// [LOG] User signed up
-// [ALERT] User signed up
+userService.subscribe(logger);
+userService.subscribe(emailNotifier);
 
-emitter.unsubscribe(alerts);
-emitter.notify("User placed order");
-// [LOG] User placed order`,
+userService.register(1, "alice@example.com");
+// UserService: registered user #1
+// [Logger] user_registered: user #1 (alice@example.com)
+// [EmailNotifier] Sending welcome email to alice@example.com`,
     },
     {
       language: "python",
       filename: "observer.py",
       description:
-        "A classic Observer implementation using an abstract base class. The Subject tracks attached observers and broadcasts state changes via notify().",
+        "A UserService that notifies Logger and EmailNotifier observers when a user_registered event fires, using abstract base classes for the observer contract.",
       code: `from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class UserData:
+    id: int
+    email: str
 
 
 class Observer(ABC):
-    """Interface for objects that should be notified of changes."""
+    """Interface for objects that react to events."""
 
     @abstractmethod
-    def update(self, message: str) -> None: ...
+    def update(self, event: str, data: UserData) -> None: ...
 
 
-class Subject:
-    """Maintains a list of observers and notifies them on state change."""
+class EventEmitter:
+    """Subject that manages subscriptions and broadcasts events."""
 
     def __init__(self) -> None:
         self._observers: list[Observer] = []
 
-    def attach(self, observer: Observer) -> None:
+    def subscribe(self, observer: Observer) -> None:
         self._observers.append(observer)
 
-    def detach(self, observer: Observer) -> None:
+    def unsubscribe(self, observer: Observer) -> None:
         self._observers.remove(observer)
 
-    def notify(self, message: str) -> None:
+    def emit(self, event: str, data: UserData) -> None:
         for observer in self._observers:
-            observer.update(message)
+            observer.update(event, data)
 
 
-class EmailSubscriber(Observer):
-    def __init__(self, address: str) -> None:
-        self._address = address
+class Logger(Observer):
+    """Concrete observer: logs events to the console."""
 
-    def update(self, message: str) -> None:
-        print(f"Email to {self._address}: {message}")
+    def update(self, event: str, data: UserData) -> None:
+        print(f"[Logger] {event}: user #{data.id} ({data.email})")
 
 
-class SMSSubscriber(Observer):
-    def __init__(self, phone: str) -> None:
-        self._phone = phone
+class EmailNotifier(Observer):
+    """Concrete observer: sends a welcome email."""
 
-    def update(self, message: str) -> None:
-        print(f"SMS to {self._phone}: {message}")
+    def update(self, event: str, data: UserData) -> None:
+        print(f"[EmailNotifier] Sending welcome email to {data.email}")
+
+
+class UserService:
+    """Concrete subject: emits events when users register."""
+
+    def __init__(self) -> None:
+        self._emitter = EventEmitter()
+
+    def subscribe(self, observer: Observer) -> None:
+        self._emitter.subscribe(observer)
+
+    def unsubscribe(self, observer: Observer) -> None:
+        self._emitter.unsubscribe(observer)
+
+    def register(self, user_id: int, email: str) -> None:
+        user = UserData(id=user_id, email=email)
+        print(f"UserService: registered user #{user_id}")
+        self._emitter.emit("user_registered", user)
 
 
 # Usage
-newsletter = Subject()
-email = EmailSubscriber("alice@example.com")
-sms = SMSSubscriber("+1234567890")
+user_service = UserService()
+logger = Logger()
+email_notifier = EmailNotifier()
 
-newsletter.attach(email)
-newsletter.attach(sms)
-newsletter.notify("New edition published!")
-# Email to alice@example.com: New edition published!
-# SMS to +1234567890: New edition published!`,
+user_service.subscribe(logger)
+user_service.subscribe(email_notifier)
+
+user_service.register(1, "alice@example.com")
+# UserService: registered user #1
+# [Logger] user_registered: user #1 (alice@example.com)
+# [EmailNotifier] Sending welcome email to alice@example.com`,
     },
     {
       language: "php",
       filename: "Observer.php",
       description:
-        "A custom Observer implementation using PHP interfaces. The NewsPublisher subject maintains subscribers and broadcasts headlines to all attached observers.",
+        "A UserService that notifies Logger and EmailNotifier observers when a user_registered event fires, using PHP interfaces for the observer and subject contracts.",
       code: `<?php
+
+// Event data
+readonly class UserData
+{
+    public function __construct(
+        public int \$id,
+        public string \$email,
+    ) {}
+}
 
 // Observer interface
 interface Observer
 {
-    public function update(string \$event, mixed \$data): void;
+    public function update(string \$event, UserData \$data): void;
 }
 
-// Subject interface
-interface Subject
-{
-    public function attach(Observer \$observer): void;
-    public function detach(Observer \$observer): void;
-    public function notify(string \$event, mixed \$data): void;
-}
-
-// Concrete subject
-class NewsPublisher implements Subject
+// Subject that manages subscriptions and broadcasts events
+class EventEmitter
 {
     /** @var Observer[] */
     private array \$observers = [];
 
-    public function attach(Observer \$observer): void
+    public function subscribe(Observer \$observer): void
     {
         \$this->observers[spl_object_id(\$observer)] = \$observer;
     }
 
-    public function detach(Observer \$observer): void
+    public function unsubscribe(Observer \$observer): void
     {
         unset(\$this->observers[spl_object_id(\$observer)]);
     }
 
-    public function notify(string \$event, mixed \$data): void
+    public function emit(string \$event, UserData \$data): void
     {
         foreach (\$this->observers as \$observer) {
             \$observer->update(\$event, \$data);
         }
     }
+}
 
-    public function publishHeadline(string \$headline): void
+// Concrete observer: logs events to the console
+class Logger implements Observer
+{
+    public function update(string \$event, UserData \$data): void
     {
-        echo "Publishing: {\$headline}\\n";
-        \$this->notify('headline', \$headline);
+        echo "[Logger] {\$event}: user #{\$data->id} ({\$data->email})\\n";
     }
 }
 
-// Concrete observers
-class WebDisplay implements Observer
+// Concrete observer: sends a welcome email
+class EmailNotifier implements Observer
 {
-    public function update(string \$event, mixed \$data): void
+    public function update(string \$event, UserData \$data): void
     {
-        echo "[Web] {\$event}: {\$data}\\n";
+        echo "[EmailNotifier] Sending welcome email to {\$data->email}\\n";
     }
 }
 
-class MobileAlert implements Observer
+// Concrete subject: emits events when users register
+class UserService
 {
-    public function update(string \$event, mixed \$data): void
+    private EventEmitter \$emitter;
+
+    public function __construct()
     {
-        echo "[Mobile Push] {\$event}: {\$data}\\n";
+        \$this->emitter = new EventEmitter();
+    }
+
+    public function subscribe(Observer \$observer): void
+    {
+        \$this->emitter->subscribe(\$observer);
+    }
+
+    public function unsubscribe(Observer \$observer): void
+    {
+        \$this->emitter->unsubscribe(\$observer);
+    }
+
+    public function register(int \$id, string \$email): void
+    {
+        \$user = new UserData(\$id, \$email);
+        echo "UserService: registered user #{\$id}\\n";
+        \$this->emitter->emit('user_registered', \$user);
     }
 }
 
 // Usage
-\$publisher = new NewsPublisher();
-\$publisher->attach(new WebDisplay());
-\$publisher->attach(new MobileAlert());
-\$publisher->publishHeadline("Design Patterns in PHP");`,
+\$userService = new UserService();
+\$userService->subscribe(new Logger());
+\$userService->subscribe(new EmailNotifier());
+
+\$userService->register(1, 'alice@example.com');
+// UserService: registered user #1
+// [Logger] user_registered: user #1 (alice@example.com)
+// [EmailNotifier] Sending welcome email to alice@example.com`,
     },
     {
       language: "rust",
       filename: "observer.rs",
       description:
-        "A callback-based observer using boxed closures stored in a Vec. This is idiomatic Rust — trait-object observers are possible but closures are simpler for most use cases.",
-      code: `/// A simple event emitter that stores boxed closure observers.
-struct EventEmitter<T> {
-    listeners: Vec<Box<dyn Fn(&T)>>,
+        "A UserService that notifies Logger and EmailNotifier observers when a user_registered event fires, using trait objects for the observer contract.",
+      code: `/// Event data passed to observers.
+#[derive(Debug)]
+struct UserData {
+    id: u64,
+    email: String,
 }
 
-impl<T> EventEmitter<T> {
+/// Observer trait: receives event notifications.
+trait Observer {
+    fn update(&self, event: &str, data: &UserData);
+}
+
+/// Subject that manages subscriptions and broadcasts events.
+struct EventEmitter {
+    observers: Vec<Box<dyn Observer>>,
+}
+
+impl EventEmitter {
     fn new() -> Self {
-        Self { listeners: Vec::new() }
+        Self { observers: Vec::new() }
     }
 
-    fn subscribe(&mut self, listener: impl Fn(&T) + 'static) {
-        self.listeners.push(Box::new(listener));
+    fn subscribe(&mut self, observer: Box<dyn Observer>) {
+        self.observers.push(observer);
     }
 
-    fn notify(&self, event: &T) {
-        for listener in &self.listeners {
-            listener(event);
+    fn emit(&self, event: &str, data: &UserData) {
+        for observer in &self.observers {
+            observer.update(event, data);
         }
     }
 }
 
-// A domain event
-#[derive(Debug)]
-struct OrderPlaced {
-    order_id: u64,
-    total: f64,
+/// Concrete observer: logs events to the console.
+struct Logger;
+
+impl Observer for Logger {
+    fn update(&self, event: &str, data: &UserData) {
+        println!("[Logger] {}: user #{} ({})", event, data.id, data.email);
+    }
+}
+
+/// Concrete observer: sends a welcome email.
+struct EmailNotifier;
+
+impl Observer for EmailNotifier {
+    fn update(&self, _event: &str, data: &UserData) {
+        println!("[EmailNotifier] Sending welcome email to {}", data.email);
+    }
+}
+
+/// Concrete subject: emits events when users register.
+struct UserService {
+    emitter: EventEmitter,
+}
+
+impl UserService {
+    fn new() -> Self {
+        Self { emitter: EventEmitter::new() }
+    }
+
+    fn subscribe(&mut self, observer: Box<dyn Observer>) {
+        self.emitter.subscribe(observer);
+    }
+
+    fn register(&mut self, id: u64, email: &str) {
+        let user = UserData { id, email: email.to_string() };
+        println!("UserService: registered user #{}", id);
+        self.emitter.emit("user_registered", &user);
+    }
 }
 
 fn main() {
-    let mut emitter = EventEmitter::new();
+    let mut user_service = UserService::new();
+    user_service.subscribe(Box::new(Logger));
+    user_service.subscribe(Box::new(EmailNotifier));
 
-    // Register observers as closures
-    emitter.subscribe(|e: &OrderPlaced| {
-        println!("[Logger] Order #{} placed, total: {:.2}", e.order_id, e.total);
-    });
-
-    emitter.subscribe(|e: &OrderPlaced| {
-        println!("[Inventory] Reserving stock for order #{}", e.order_id);
-    });
-
-    emitter.subscribe(|e: &OrderPlaced| {
-        if e.total > 100.0 {
-            println!("[Rewards] VIP bonus applied for order #{}", e.order_id);
-        }
-    });
-
-    let event = OrderPlaced { order_id: 42, total: 149.99 };
-    emitter.notify(&event);
-    // [Logger] Order #42 placed, total: 149.99
-    // [Inventory] Reserving stock for order #42
-    // [Rewards] VIP bonus applied for order #42
+    user_service.register(1, "alice@example.com");
+    // UserService: registered user #1
+    // [Logger] user_registered: user #1 (alice@example.com)
+    // [EmailNotifier] Sending welcome email to alice@example.com
 }`,
     },
   ],

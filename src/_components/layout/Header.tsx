@@ -60,10 +60,10 @@ export function Header() {
             </ul>
           </nav>
           <a
-            href="https://github.com/wickedbyte"
+            href="https://github.com/wickedbyte/design-pattern-decision-tree"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="WickedByte on GitHub"
+            aria-label="GitHub Repository for Website"
             className="rounded-md p-1.5 text-text-muted hover:text-text-primary transition-colors"
           >
             <GitHubIcon className="h-5 w-5" />

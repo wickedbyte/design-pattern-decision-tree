@@ -1,7 +1,10 @@
 "use client";
 
 import { Suspense } from "react";
-import type { CodeExample, LanguageAntiPatternNotice } from "@/_lib/domain/CodeExample";
+import type {
+  CodeExample,
+  LanguageAntiPatternNotice,
+} from "@/_lib/domain/CodeExample";
 import type { Language } from "@/_lib/domain/Language";
 import { LANGUAGE_INFO } from "@/_lib/data/languages";
 import { Tabs } from "@/_components/ui/Tabs";

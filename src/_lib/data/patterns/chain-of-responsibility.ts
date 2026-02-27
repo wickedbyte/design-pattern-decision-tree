@@ -50,8 +50,7 @@ export const chainOfResponsibility: PatternDefinition = {
     createPatternSlug("decorator"),
     createPatternSlug("composite"),
   ],
-  decisionTreeQuestion:
-    "Request must pass through a chain of handlers?",
+  decisionTreeQuestion: "Request must pass through a chain of handlers?",
   codeExamples: [
     {
       language: "typescript",

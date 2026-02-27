@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getAllPatterns } from "@/_lib/data/patterns";
 import { getAllCategories } from "@/_lib/domain/PatternCategory";
 import { PatternCard } from "@/_components/patterns/PatternCard";
@@ -10,7 +11,6 @@ const ICON_COLORS: Record<string, string> = {
   structural: "text-structural",
   behavioral: "text-behavioral",
 };
-
 
 export const metadata: Metadata = {
   title: "Design Pattern Catalog",
@@ -24,9 +24,17 @@ export default function PatternsPage() {
 
   return (
     <Container className="py-8">
-      <h1 className="text-3xl font-bold text-text-primary sm:text-4xl">
-        Design Pattern Catalog
-      </h1>
+      <div className="flex items-start justify-between gap-4">
+        <h1 className="text-3xl font-bold text-text-primary sm:text-4xl">
+          Design Pattern Catalog
+        </h1>
+        <Link
+          href="/patterns/compare"
+          className="shrink-0 rounded-lg border border-border-primary bg-bg-surface px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:border-accent-blue hover:text-accent-blue"
+        >
+          Compare Patterns
+        </Link>
+      </div>
 
       {categories.map((cat) => {
         const catPatterns = patterns.filter((p) => p.category === cat.id);

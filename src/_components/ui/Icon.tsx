@@ -23,6 +23,8 @@ import {
   faDesktop,
   faSun,
   faMoon,
+  faXmark,
+  faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 
 const ICON_MAP: Record<string, IconDefinition> = {
@@ -49,6 +51,8 @@ const ICON_MAP: Record<string, IconDefinition> = {
   desktop: faDesktop,
   sun: faSun,
   moon: faMoon,
+  xmark: faXmark,
+  "arrow-right": faArrowRight,
 };
 
 interface IconProps {

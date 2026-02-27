@@ -272,7 +272,12 @@ export const DECISION_EDGES: readonly DecisionEdge[] = [
   { id: "e-b3-no", source: "b3", target: "b4", label: "No" },
   { id: "e-b4-yes", source: "b4", target: "p-command", label: "Yes" },
   { id: "e-b4-no", source: "b4", target: "b5", label: "No" },
-  { id: "e-b5-yes", source: "b5", target: "p-chain-of-responsibility", label: "Yes" },
+  {
+    id: "e-b5-yes",
+    source: "b5",
+    target: "p-chain-of-responsibility",
+    label: "Yes",
+  },
   { id: "e-b5-no", source: "b5", target: "b6", label: "No" },
   { id: "e-b6-yes", source: "b6", target: "p-template-method", label: "Yes" },
   { id: "e-b6-no", source: "b6", target: "fallback", label: "No" },

@@ -3,7 +3,7 @@ import { getAllPatterns, getPatternsByCategory } from "@/_lib/data/patterns";
 import { getAllCategories } from "@/_lib/domain/PatternCategory";
 import { Container } from "@/_components/ui/Container";
 import { Icon } from "@/_components/ui/Icon";
-import { DecisionTreeContainer } from "@/_components/tree/DecisionTreeContainer";
+import { DecisionWizardWrapper } from "@/_components/tree/DecisionWizardWrapper";
 
 const CATEGORY_STYLES: Record<string, string> = {
   creational:
@@ -26,30 +26,24 @@ export default function Home() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden py-16 sm:py-20">
+      {/* Hero + Wizard */}
+      <section className="relative overflow-hidden py-12 sm:py-16">
         <div className="absolute inset-0 bg-gradient-to-b from-bg-secondary to-bg-primary" />
-        <Container className="relative text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight text-text-primary sm:text-5xl lg:text-6xl">
-            Find the Right{" "}
-            <span className="text-accent-blue">Design Pattern</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-3xl text-text-secondary">
-            Start with the <i>problem</i>, not the patterns
-          </p>
-        </Container>
-      </section>
+        <Container className="relative">
+          <div className="text-center">
+            <h1 className="text-4xl font-extrabold tracking-tight text-text-primary sm:text-5xl lg:text-6xl">
+              Find the Right{" "}
+              <span className="text-accent-blue">Design Pattern</span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-lg text-text-secondary">
+              Answer questions about your problem to discover the right pattern
+            </p>
+          </div>
 
-      {/* Decision Tree */}
-      <section id="decision-tree" className="bg-bg-inset py-16">
-        <Container>
-          <h2 className="mb-2 text-center text-2xl font-bold text-text-primary sm:text-3xl">
-            Interactive Decision Tree
-          </h2>
-          <p className="mb-8 text-center text-sm text-text-muted">
-            Click a node to trace a path. Pattern nodes link to full documentation.
-          </p>
-          <DecisionTreeContainer />
+          {/* Wizard */}
+          <div id="decision-tree" className="mt-10">
+            <DecisionWizardWrapper />
+          </div>
         </Container>
       </section>
 
@@ -70,10 +64,7 @@ export default function Home() {
                   href="/patterns"
                   className={`group rounded-xl bg-bg-surface p-6 shadow-sm transition-all hover:-translate-y-0.5 ${styles}`}
                 >
-                  <Icon
-                    name={cat.icon}
-                    className={`h-7 w-7 ${iconColor}`}
-                  />
+                  <Icon name={cat.icon} className={`h-7 w-7 ${iconColor}`} />
                   <h3 className="mt-3 text-lg font-bold text-text-primary">
                     {cat.name}
                   </h3>
@@ -86,6 +77,17 @@ export default function Home() {
                 </Link>
               );
             })}
+          </div>
+
+          {/* Link to full tree */}
+          <div className="mt-10 text-center">
+            <Link
+              href="/tree"
+              className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-accent-blue transition-colors"
+            >
+              <Icon name="sitemap" className="h-4 w-4" />
+              View the full decision tree graph
+            </Link>
           </div>
         </Container>
       </section>

@@ -6,7 +6,11 @@ export function QuestionNode({ data }: NodeProps) {
   return (
     <div className="flex h-full items-center justify-center rounded-lg border border-border-primary bg-bg-surface px-3 py-2 text-center text-sm text-text-primary shadow-sm">
       <span>{d.label}</span>
-      <Handle type="target" position={Position.Top} className="!bg-accent-purple" />
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="!bg-accent-purple"
+      />
       <Handle
         type="source"
         position={Position.Bottom}

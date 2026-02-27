@@ -48,7 +48,8 @@ export const builder: PatternDefinition = {
     createPatternSlug("prototype"),
     createPatternSlug("singleton"),
   ],
-  decisionTreeQuestion: "Object has many optional parts or complex construction?",
+  decisionTreeQuestion:
+    "Object has many optional parts or complex construction?",
   codeExamples: [
     {
       language: "typescript",

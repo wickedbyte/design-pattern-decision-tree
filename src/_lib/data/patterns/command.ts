@@ -51,8 +51,7 @@ export const command: PatternDefinition = {
     createPatternSlug("chain-of-responsibility"),
     createPatternSlug("strategy"),
   ],
-  decisionTreeQuestion:
-    "Need undo/redo, queuing, or logging of operations?",
+  decisionTreeQuestion: "Need undo/redo, queuing, or logging of operations?",
   codeExamples: [
     {
       language: "typescript",

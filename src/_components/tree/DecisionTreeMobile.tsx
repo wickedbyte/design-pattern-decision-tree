@@ -2,12 +2,15 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useDecisionPath } from "./hooks/useDecisionPath";
+import { WizardBreadcrumb } from "./WizardBreadcrumb";
 import { DECISION_NODES, DECISION_EDGES } from "@/_lib/data/decision-tree";
 import type { DecisionNode } from "@/_lib/domain/DecisionNode";
 
-function getChildren(nodeId: string): { node: DecisionNode; edgeLabel?: string }[] {
+function getChildren(
+  nodeId: string
+): { node: DecisionNode; edgeLabel?: string }[] {
   return DECISION_EDGES.filter((e) => e.source === nodeId).map((e) => ({
     node: DECISION_NODES.find((n) => n.id === e.target)!,
     edgeLabel: e.label,
@@ -22,6 +25,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export function DecisionTreeMobile() {
   const { path, selectNode, goBack, reset } = useDecisionPath();
+  const prefersReducedMotion = useReducedMotion();
 
   const currentNodeId = path.currentNodeId ?? "start";
   const currentNode = useMemo(
@@ -30,30 +34,39 @@ export function DecisionTreeMobile() {
   );
   const children = useMemo(() => getChildren(currentNodeId), [currentNodeId]);
 
+  const handleBreadcrumbNavigate = (nodeId: string) => {
+    // Navigate back to this node by trimming the path
+    const trimmedPath = path.removeAfter(nodeId);
+    // Reset and replay: we need to use the hook's selectNode
+    // Instead, use reset then re-navigate — or just goBack multiple times
+    // Simplest: use the path's removeAfter and write it directly
+    // Since we're using the URL-backed hook, just write the new hash
+    reset();
+    for (const step of trimmedPath.steps) {
+      selectNode(step.nodeId, step.answer);
+    }
+  };
+
+  const animationProps = prefersReducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, x: 20 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: -20 },
+        transition: { duration: 0.2 },
+      };
+
   return (
     <div className="w-full">
-      {/* Progress */}
-      {path.length > 0 && (
-        <div className="mb-4 flex items-center gap-2 text-sm text-text-muted">
-          <span>Step {path.length}</span>
-          <span aria-hidden="true">·</span>
-          <button
-            onClick={reset}
-            className="text-accent-blue hover:underline"
-          >
-            Start over
-          </button>
-        </div>
-      )}
+      {/* Breadcrumb trail */}
+      <WizardBreadcrumb
+        path={path}
+        onNavigate={handleBreadcrumbNavigate}
+        onReset={reset}
+      />
 
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentNodeId}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.2 }}
-        >
+        <motion.div key={currentNodeId} {...animationProps}>
           {/* Current question / result */}
           <div className="rounded-xl border border-border-primary bg-bg-surface p-6 shadow-sm">
             {currentNode.kind === "start" && (
@@ -120,10 +133,13 @@ export function DecisionTreeMobile() {
                   }
                   className={`w-full rounded-xl border p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 ${
                     node.kind === "category"
-                      ? CATEGORY_COLORS[node.categoryId as string] ?? "border-border-primary bg-bg-elevated"
+                      ? (CATEGORY_COLORS[node.categoryId as string] ??
+                        "border-border-primary bg-bg-elevated")
                       : "border-border-primary bg-bg-elevated hover:border-border-accent"
                   }`}
-                  aria-label={edgeLabel ? `${edgeLabel}: ${node.label}` : node.label}
+                  aria-label={
+                    edgeLabel ? `${edgeLabel}: ${node.label}` : node.label
+                  }
                 >
                   {edgeLabel && (
                     <span

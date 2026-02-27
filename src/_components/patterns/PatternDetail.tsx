@@ -26,8 +26,10 @@ interface PatternDetailProps {
 
 export function PatternDetail({ pattern }: PatternDetailProps) {
   const category = getCategoryInfo(pattern.category);
-  const iconColor = CATEGORY_ICON_COLOR[pattern.category as string] ?? "text-text-muted";
-  const accent = CATEGORY_ACCENT[pattern.category as string] ?? "bg-accent-blue";
+  const iconColor =
+    CATEGORY_ICON_COLOR[pattern.category as string] ?? "text-text-muted";
+  const accent =
+    CATEGORY_ACCENT[pattern.category as string] ?? "bg-accent-blue";
 
   return (
     <Container className="py-8">
@@ -35,7 +37,10 @@ export function PatternDetail({ pattern }: PatternDetailProps) {
         items={[
           { label: "Home", href: "/" },
           { label: "Design Pattern Catalog", href: "/patterns" },
-          { label: category.name, href: `/patterns?category=${pattern.category}` },
+          {
+            label: category.name,
+            href: `/patterns?category=${pattern.category}`,
+          },
           { label: pattern.name },
         ]}
       />

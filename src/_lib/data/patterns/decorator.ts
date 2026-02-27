@@ -50,8 +50,7 @@ export const decorator: PatternDefinition = {
     createPatternSlug("composite"),
     createPatternSlug("strategy"),
   ],
-  decisionTreeQuestion:
-    "Need to add responsibilities to objects dynamically?",
+  decisionTreeQuestion: "Need to add responsibilities to objects dynamically?",
   codeExamples: [
     {
       language: "typescript",

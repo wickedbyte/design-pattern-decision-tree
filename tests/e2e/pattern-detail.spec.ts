@@ -8,11 +8,21 @@ test.describe("Pattern Detail Page", () => {
     await expect(page.getByRole("heading", { name: "Intent" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Problem" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Solution" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Participants" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Advantages", exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Disadvantages", exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Real-World Analogy" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Use Cases" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Participants" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Advantages", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Disadvantages", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Real-World Analogy" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Use Cases" })
+    ).toBeVisible();
   });
 
   test("code example tabs switch between languages", async ({ page }) => {

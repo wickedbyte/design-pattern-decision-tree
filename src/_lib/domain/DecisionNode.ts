@@ -1,7 +1,12 @@
 import type { PatternSlug } from "./PatternSlug";
 import type { PatternCategoryId } from "./PatternCategory";
 
-export type NodeKind = "start" | "category" | "question" | "pattern" | "fallback";
+export type NodeKind =
+  | "start"
+  | "category"
+  | "question"
+  | "pattern"
+  | "fallback";
 
 export interface DecisionNode {
   readonly id: string;

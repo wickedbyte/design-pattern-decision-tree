@@ -49,8 +49,7 @@ export const proxy: PatternDefinition = {
     createPatternSlug("adapter"),
     createPatternSlug("facade"),
   ],
-  decisionTreeQuestion:
-    "Need to control access, lazy-load, or add a stand-in?",
+  decisionTreeQuestion: "Need to control access, lazy-load, or add a stand-in?",
   codeExamples: [
     {
       language: "typescript",

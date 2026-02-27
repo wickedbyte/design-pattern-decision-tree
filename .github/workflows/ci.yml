@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+
+      - run: pnpm test
+
+      - run: pnpm build
+
+      - run: pnpm exec playwright install chromium --with-deps
+      - id: e2e
+        run: pnpm test:e2e
+
+      - uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

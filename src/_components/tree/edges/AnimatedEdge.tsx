@@ -27,7 +27,11 @@ export function AnimatedEdge({
 
   return (
     <>
-      <BaseEdge id={id} path={edgePath} style={{ ...style, stroke: color, strokeWidth: 2 }} />
+      <BaseEdge
+        id={id}
+        path={edgePath}
+        style={{ ...style, stroke: color, strokeWidth: 2 }}
+      />
       {label && (
         <foreignObject
           x={labelX - 16}

@@ -12,7 +12,11 @@ export function PatternNode({ data }: NodeProps) {
       >
         {d.label}
       </Link>
-      <Handle type="target" position={Position.Top} className="!bg-accent-cyan" />
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="!bg-accent-cyan"
+      />
     </div>
   );
 }

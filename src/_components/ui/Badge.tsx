@@ -1,12 +1,9 @@
 import type { PatternCategoryId } from "@/_lib/domain/PatternCategory";
 
 const CATEGORY_STYLES: Record<string, string> = {
-  creational:
-    "bg-creational-bg text-creational-dark border-creational-border",
-  structural:
-    "bg-structural-bg text-structural-dark border-structural-border",
-  behavioral:
-    "bg-behavioral-bg text-behavioral-dark border-behavioral-border",
+  creational: "bg-creational-bg text-creational-dark border-creational-border",
+  structural: "bg-structural-bg text-structural-dark border-structural-border",
+  behavioral: "bg-behavioral-bg text-behavioral-dark border-behavioral-border",
 };
 
 interface BadgeProps {

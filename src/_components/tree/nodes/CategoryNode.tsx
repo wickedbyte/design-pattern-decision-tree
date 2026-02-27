@@ -19,7 +19,11 @@ export function CategoryNode({ data }: NodeProps) {
         <span className="mt-0.5 text-xs opacity-80">{d.description}</span>
       )}
       <Handle type="target" position={Position.Top} className="!bg-white/50" />
-      <Handle type="source" position={Position.Bottom} className="!bg-white/50" />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="!bg-white/50"
+      />
     </div>
   );
 }

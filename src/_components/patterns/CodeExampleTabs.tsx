@@ -1,4 +1,7 @@
-import type { CodeExample, LanguageAntiPatternNotice } from "@/_lib/domain/CodeExample";
+import type {
+  CodeExample,
+  LanguageAntiPatternNotice,
+} from "@/_lib/domain/CodeExample";
 import { LANGUAGE_ORDER } from "@/_lib/data/languages";
 import { CodeExampleTabsClient } from "./CodeExampleTabsClient";
 
@@ -17,7 +20,5 @@ export function CodeExampleTabs({
     notice: antiPatternNotices.find((n) => n.language === lang),
   })).filter((item) => item.example || item.notice);
 
-  return (
-    <CodeExampleTabsClient items={orderedExamples} />
-  );
+  return <CodeExampleTabsClient items={orderedExamples} />;
 }

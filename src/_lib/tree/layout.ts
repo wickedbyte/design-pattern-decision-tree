@@ -7,6 +7,13 @@ interface LayoutResult {
   edges: DecisionEdge[];
 }
 
+interface DagreNode {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 const NODE_DIMENSIONS: Record<string, { width: number; height: number }> = {
   start: { width: 280, height: 60 },
   category: { width: 240, height: 80 },
@@ -44,7 +51,7 @@ export function computeTreeLayout(
     { x: number; y: number; width: number; height: number }
   >();
   for (const node of nodes) {
-    const n = g.node(node.id);
+    const n = g.node(node.id) as DagreNode;
     result.set(node.id, {
       x: n.x - n.width / 2,
       y: n.y - n.height / 2,

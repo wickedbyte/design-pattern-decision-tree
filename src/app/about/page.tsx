@@ -20,9 +20,9 @@ export default function AboutPage() {
             Methodology
           </h2>
           <p className="mt-3 text-text-secondary leading-relaxed">
-            Design patterns don&apos;t fail because they&apos;re wrong &mdash; they fail
-            because developers reach for them at the wrong moment. Instead of
-            memorizing all 23 Gang of Four patterns, this tool uses a{" "}
+            Design patterns don&apos;t fail because they&apos;re wrong &mdash;
+            they fail because developers reach for them at the wrong moment.
+            Instead of memorizing all 23 Gang of Four patterns, this tool uses a{" "}
             <strong className="text-text-primary">
               pain-point-first decision tree
             </strong>
@@ -47,10 +47,10 @@ export default function AboutPage() {
               Instead&rdquo;
             </a>{" "}
             by <strong className="text-text-primary">Alina Kovtun</strong>,
-            published on Medium&apos;s Women in Technology publication. The article
-            proposes a decision tree covering 17 of the original Gang of Four
-            design patterns across three categories: Creational, Structural, and
-            Behavioral.
+            published on Medium&apos;s Women in Technology publication. The
+            article proposes a decision tree covering 17 of the original Gang of
+            Four design patterns across three categories: Creational,
+            Structural, and Behavioral.
           </p>
         </section>
 
@@ -61,23 +61,38 @@ export default function AboutPage() {
           <ul className="mt-3 space-y-2 text-text-secondary">
             <li className="flex gap-2">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
-              <span>Interactive decision tree with desktop flowchart and mobile wizard views</span>
+              <span>
+                Interactive decision tree with desktop flowchart and mobile
+                wizard views
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
-              <span>Complete pattern documentation with intent, problem, solution, and real-world analogies</span>
+              <span>
+                Complete pattern documentation with intent, problem, solution,
+                and real-world analogies
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
-              <span>Code examples in four languages: TypeScript, Python, PHP, and Rust</span>
+              <span>
+                Code examples in four languages: TypeScript, Python, PHP, and
+                Rust
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
-              <span>Language-specific notes where patterns are anti-patterns or require idiomatic alternatives</span>
+              <span>
+                Language-specific notes where patterns are anti-patterns or
+                require idiomatic alternatives
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-green" />
-              <span>Architecture designed to easily add new patterns beyond the original 17</span>
+              <span>
+                Architecture designed to easily add new patterns beyond the
+                original 17
+              </span>
             </li>
           </ul>
         </section>

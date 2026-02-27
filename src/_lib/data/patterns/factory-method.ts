@@ -48,8 +48,7 @@ export const factoryMethod: PatternDefinition = {
     createPatternSlug("prototype"),
     createPatternSlug("builder"),
   ],
-  decisionTreeQuestion:
-    "None of the above, but creation should be delegated?",
+  decisionTreeQuestion: "None of the above, but creation should be delegated?",
   codeExamples: [
     {
       language: "typescript",

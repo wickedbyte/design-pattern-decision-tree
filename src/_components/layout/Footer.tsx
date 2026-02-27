@@ -70,17 +70,17 @@ export function Footer() {
             by Alina Kovtun
           </p>
           <a
-              href="https://wickedbyte.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#663366] dark:text-[#d6dbe0] hover:opacity-80 transition-opacity"
-              aria-label="WickedByte"
+            href="https://wickedbyte.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#663366] dark:text-[#d6dbe0] hover:opacity-80 transition-opacity"
+            aria-label="WickedByte"
           >
             <WickedByteLogo className="h-8" />
           </a>
           <div className="flex items-center gap-2 text-xs text-text-muted">
             <span>
-              &copy; {new Date().getFullYear()} WickedByte. Licensed under the {" "}
+              &copy; {new Date().getFullYear()} WickedByte. Licensed under the{" "}
               <a
                 href="https://opensource.org/licenses/MIT"
                 target="_blank"

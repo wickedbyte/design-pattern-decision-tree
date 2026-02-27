@@ -9,7 +9,12 @@ interface TabsProps {
   className?: string;
 }
 
-export function Tabs({ tabs, children, defaultTab, className = "" }: TabsProps) {
+export function Tabs({
+  tabs,
+  children,
+  defaultTab,
+  className = "",
+}: TabsProps) {
   const [activeId, setActiveId] = useState(defaultTab ?? tabs[0]?.id ?? "");
   const groupId = useId();
 
@@ -37,7 +42,8 @@ export function Tabs({ tabs, children, defaultTab, className = "" }: TabsProps) 
                 setActiveId(next.id);
               } else if (e.key === "ArrowLeft") {
                 e.preventDefault();
-                const prev = tabs[(currentIndex - 1 + tabs.length) % tabs.length];
+                const prev =
+                  tabs[(currentIndex - 1 + tabs.length) % tabs.length];
                 setActiveId(prev.id);
               }
             }}

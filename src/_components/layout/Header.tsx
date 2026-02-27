@@ -6,8 +6,9 @@ import { ThemeToggle } from "./ThemeToggle";
 import { MobileNav } from "./MobileNav";
 
 const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/patterns", label: "Design Pattern Catalog" },
+  { href: "/", label: "Wizard" },
+  { href: "/patterns", label: "Catalog" },
+  { href: "/tree", label: "Full Tree" },
   { href: "/about", label: "About" },
 ];
 

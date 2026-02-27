@@ -19,9 +19,11 @@ test.describe("Accessibility", () => {
     await expect(nav).toBeAttached();
   });
 
-  test("theme toggle has radiogroup role", async ({ page }) => {
+  test("theme toggle has accessible label", async ({ page }) => {
     await page.goto("/");
-    const toggle = page.getByRole("radiogroup", { name: "Color theme" });
+    const toggle = page.getByRole("button", {
+      name: /Switch to (light|dark) mode/,
+    });
     await expect(toggle).toBeVisible();
   });
 

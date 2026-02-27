@@ -34,7 +34,9 @@ export function PatternMeta({ pattern }: PatternMetaProps) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-lg border border-accent-green/20 bg-accent-green/5 p-5">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-accent-green">Advantages</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-accent-green">
+            Advantages
+          </h2>
           <ul className="mt-3 space-y-1.5 text-sm text-text-secondary">
             {pattern.consequences.advantages.map((a) => (
               <li key={a} className="flex gap-2">
@@ -45,7 +47,9 @@ export function PatternMeta({ pattern }: PatternMetaProps) {
           </ul>
         </div>
         <div className="rounded-lg border border-accent-rose/20 bg-accent-rose/5 p-5">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-accent-rose">Disadvantages</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-accent-rose">
+            Disadvantages
+          </h2>
           <ul className="mt-3 space-y-1.5 text-sm text-text-secondary">
             {pattern.consequences.disadvantages.map((d) => (
               <li key={d} className="flex gap-2">
@@ -88,7 +92,9 @@ function Section({
 }) {
   return (
     <section className="rounded-lg border border-border-primary bg-bg-surface p-5 shadow-sm">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-muted">{title}</h2>
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-muted">
+        {title}
+      </h2>
       {children}
     </section>
   );

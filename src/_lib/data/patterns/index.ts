@@ -41,7 +41,7 @@ const ALL_PATTERNS: readonly PatternDefinition[] = [
 ];
 
 const PATTERN_MAP = new Map<string, PatternDefinition>(
-  ALL_PATTERNS.map((p) => [p.slug as string, p])
+  ALL_PATTERNS.map((p) => [p.slug, p])
 );
 
 export function getAllPatterns(): readonly PatternDefinition[] {
@@ -51,7 +51,7 @@ export function getAllPatterns(): readonly PatternDefinition[] {
 export function getPatternBySlug(
   slug: PatternSlug | string
 ): PatternDefinition | undefined {
-  return PATTERN_MAP.get(slug as string);
+  return PATTERN_MAP.get(slug);
 }
 
 export function getPatternsByCategory(

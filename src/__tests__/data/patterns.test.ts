@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { getAllPatterns, getPatternBySlug, getPatternsByCategory } from "@/_lib/data/patterns";
+import {
+  getAllPatterns,
+  getPatternBySlug,
+  getPatternsByCategory,
+} from "@/_lib/data/patterns";
 import { PATTERN_SLUGS } from "@/_lib/domain/PatternSlug";
 import { LANGUAGES } from "@/_lib/domain/Language";
 import { createCategoryId } from "@/_lib/domain/PatternCategory";

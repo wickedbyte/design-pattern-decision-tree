@@ -1,14 +1,16 @@
 import type { Node, Edge } from "@xyflow/react";
-import type { DecisionNode } from "@/_lib/domain/DecisionNode";
+import type { DecisionNode, NodeKind } from "@/_lib/domain/DecisionNode";
 import type { DecisionEdge } from "@/_lib/domain/DecisionEdge";
+import type { PatternSlug } from "@/_lib/domain/PatternSlug";
+import type { PatternCategoryId } from "@/_lib/domain/PatternCategory";
 import { computeTreeLayout } from "./layout";
 
 export interface FlowNodeData extends Record<string, unknown> {
   label: string;
-  kind: string;
+  kind: NodeKind;
   description?: string;
-  patternSlug?: string;
-  categoryId?: string;
+  patternSlug?: PatternSlug;
+  categoryId?: PatternCategoryId;
 }
 
 export function toReactFlowElements(
@@ -18,7 +20,8 @@ export function toReactFlowElements(
   const layout = computeTreeLayout(nodes, edges);
 
   const flowNodes: Node<FlowNodeData>[] = nodes.map((node) => {
-    const pos = layout.nodes.get(node.id)!;
+    const pos = layout.nodes.get(node.id);
+    if (!pos) throw new Error(`Missing layout for node ${node.id}`);
     return {
       id: node.id,
       type: node.kind,
@@ -27,8 +30,8 @@ export function toReactFlowElements(
         label: node.label,
         kind: node.kind,
         description: node.description,
-        patternSlug: node.patternSlug as string | undefined,
-        categoryId: node.categoryId as string | undefined,
+        patternSlug: node.patternSlug,
+        categoryId: node.categoryId,
       },
       draggable: false,
       connectable: false,

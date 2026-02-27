@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import {
   ReactFlow,
-  MiniMap,
   Controls,
   Background,
   BackgroundVariant,
@@ -100,25 +99,7 @@ export function DecisionTreeGraph() {
             color="var(--text-muted)"
             className="opacity-20"
           />
-          <MiniMap
-            nodeColor={(node) => {
-              switch (node.type) {
-                case "start":
-                  return "var(--accent-rose)";
-                case "category":
-                  return "var(--accent-blue)";
-                case "question":
-                  return "var(--accent-purple)";
-                case "pattern":
-                  return "var(--accent-cyan)";
-                case "fallback":
-                  return "var(--structural-dark)";
-                default:
-                  return "var(--text-muted)";
-              }
-            }}
-            className="!bg-bg-elevated !border-border-primary"
-          />
+
           <Controls className="!bg-bg-surface !border-border-primary !shadow-sm [&_button]:!bg-bg-surface [&_button]:!border-border-primary [&_button]:!text-text-secondary" />
         </ReactFlow>
       </div>

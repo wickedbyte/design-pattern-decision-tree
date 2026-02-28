@@ -22,7 +22,11 @@ export function PatternCard({ pattern }: PatternCardProps) {
     <div
       className={`group relative rounded-xl border-y border-r border-border-primary bg-bg-surface p-5 shadow-sm transition-all hover:-translate-y-0.5 ${accent}`}
     >
-      <Link href={`/patterns/${pattern.slug}`} className="block">
+      <Link
+        href={`/patterns/${pattern.slug}`}
+        prefetch={false}
+        className="block"
+      >
         <div className="flex items-start justify-between gap-2">
           <Icon name={pattern.icon} className="h-5 w-5 text-text-muted" />
           <Badge category={pattern.category}>{category.name}</Badge>
@@ -36,6 +40,7 @@ export function PatternCard({ pattern }: PatternCardProps) {
       </Link>
       <Link
         href={`/patterns/compare?a=${pattern.slug}`}
+        prefetch={false}
         className="absolute top-3 right-3 rounded-md p-1.5 text-text-muted opacity-0 transition-all hover:bg-bg-elevated hover:text-accent-blue group-hover:opacity-100"
         aria-label={`Compare ${pattern.name}`}
         title="Compare"

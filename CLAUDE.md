@@ -10,7 +10,7 @@ Interactive website helping developers choose the right design pattern using a p
 - **Decision Tree**: React Flow (`@xyflow/react`) + dagre layout
 - **Animations**: Motion (`motion`) with reduced-motion support
 - **Icons**: FontAwesome SVG icons via custom `Icon` component (`@/_components/ui/Icon.tsx`) — renders from FA icon definitions, no react-fontawesome
-- **Syntax Highlighting**: Shiki (client-side dynamic import via `CodeBlockClient.tsx`)
+- **Syntax Highlighting**: Shiki (build-time pre-rendering via server-side `highlightCode()`, no client-side Shiki)
 - **Dark Mode**: next-themes (defaults to system preference, two-way light/dark toggle)
 - **Fonts**: Geist Sans + Geist Mono (variable, loaded from `geist` package)
 - **Formatting**: Prettier (config in `.prettierrc.json`, integrated with ESLint via `eslint-config-prettier`)
@@ -83,7 +83,8 @@ src/
         useDecisionPath.ts      # React state-backed decision path (no URL)
     patterns/           # Pattern display components
       PatternDetail.tsx, PatternCard.tsx, PatternMeta.tsx
-      CodeExampleTabs.tsx, CodeExampleTabsClient.tsx, CodeBlockClient.tsx
+      CodeExampleTabs.tsx          # Async server component: pre-highlights all code at build time
+      CodeExampleTabsClient.tsx    # Client tab switching with pre-rendered HTML
       CodeBlock.tsx, RelatedPatterns.tsx, LanguageNotice.tsx
       CompareView.tsx             # Two-column pattern comparison layout
       CompareSelector.tsx         # Pattern selection comboboxes with swap

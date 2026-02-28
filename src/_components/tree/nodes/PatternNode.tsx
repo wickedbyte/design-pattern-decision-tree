@@ -8,6 +8,7 @@ export function PatternNode({ data }: NodeProps) {
     <div className="flex h-full items-center justify-center rounded-lg border border-accent-cyan/30 bg-bg-surface px-4 py-2 text-center shadow-sm">
       <Link
         href={`/patterns/${d.patternSlug}`}
+        prefetch={false}
         className="text-sm font-semibold text-accent-cyan hover:underline"
       >
         {d.label}
